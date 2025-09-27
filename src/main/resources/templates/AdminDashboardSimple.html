@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title}">Admin Dashboard - LifeBlood Donation System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .blood-gradient {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+    }
+    .blood-drop {
+      animation: drip 3s ease-in-out infinite;
+    }
+    @keyframes drip {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(5px); }
+    }
+    .pulse-heart {
+      animation: pulse-beat 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-beat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .admin-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .admin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #dc2626, #f59e0b, #10b981);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .admin-card:hover::before {
+      opacity: 1;
+    }
+    .stats-card {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border-left: 4px solid #dc2626;
+    }
+    .card-icon {
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 8px rgba(220, 38, 38, 0.3));
+    }
+    .admin-card:hover .card-icon {
+      transform: scale(1.1) rotate(5deg);
+      filter: drop-shadow(0 8px 16px rgba(220, 38, 38, 0.4));
+    }
+    .card-button {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .card-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.6s ease;
+    }
+    .card-button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    .card-title {
+      background: linear-gradient(135deg, #1f2937, #374151);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .floating-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- Navigation Header -->
+  <nav class="blood-gradient shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-heartbeat text-white text-2xl mr-3 pulse-heart"></i>
+            <span class="text-white text-xl font-bold">LifeBlood Admin</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-white text-sm">
+            <i class="fas fa-user-shield mr-2"></i>
+            <span th:text="${userFullName}">Admin User</span>
+          </span>
+          <a href="/staff/logout" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">
+            <i class="fas fa-sign-out-alt mr-1"></i>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Page Header -->
+    <div class="px-4 py-6 sm:px-0">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          <i class="fas fa-tachometer-alt text-red-600 mr-3"></i>
+          Admin Dashboard
+        </h1>
+        <p class="text-xl text-gray-600">Manage the Blood Donation System</p>
+        <div th:if="${warningMessage}" class="mt-4 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          <span th:text="${warningMessage}"></span>
+        </div>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="stats-card rounded-lg p-6 admin-card">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-users text-red-600 text-3xl"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Total Donors</dt>
+                <dd class="text-lg font-medium text-gray-900" id="donorCount">Loading...</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card rounded-lg p-6 admin-card">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-calendar-check text-red-600 text-3xl"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Appointments</dt>
+                <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card rounded-lg p-6 admin-card">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-clock text-red-600 text-3xl"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Available Slots</dt>
+                <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card rounded-lg p-6 admin-card">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-hospital text-red-600 text-3xl"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">Total Receivers</dt>
+                <dd class="text-lg font-medium text-gray-900" id="receiverCount">Loading...</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-card rounded-lg p-6 admin-card">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <i class="fas fa-chart-line text-red-600 text-3xl"></i>
+            </div>
+            <div class="ml-5 w-0 flex-1">
+              <dl>
+                <dt class="text-sm font-medium text-gray-500 truncate">This Month</dt>
+                <dd class="text-lg font-medium text-gray-900">Loading...</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Management Actions -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Appointment Slots Management -->
+        <div class="bg-white rounded-xl shadow-xl p-8 admin-card floating-animation">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full mb-4 card-icon">
+              <i class="fas fa-calendar-plus text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold card-title mb-2">Appointment Slots</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">Manage available appointment slots for donors with ease and precision.</p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="loadAppointmentSlots()" class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-list mr-2"></i>
+              View All Slots
+            </button>
+            <button onclick="showAddSlotForm()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-plus mr-2"></i>
+              Add New Slot
+            </button>
+          </div>
+        </div>
+
+        <!-- Donors Management -->
+        <div class="bg-white rounded-xl shadow-xl p-8 admin-card floating-animation" style="animation-delay: 0.5s;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mb-4 card-icon">
+              <i class="fas fa-user-heart text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold card-title mb-2">Manage Donors</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">View and manage donor information with comprehensive details and controls.</p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="loadDonors()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-list mr-2"></i>
+              View All Donors
+            </button>
+            <button onclick="showSystemInfo()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-info-circle mr-2"></i>
+              System Information
+            </button>
+          </div>
+        </div>
+
+        <!-- Receivers Management -->
+        <div class="bg-white rounded-xl shadow-xl p-8 admin-card floating-animation" style="animation-delay: 0.75s;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4 card-icon">
+              <i class="fas fa-hospital text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold card-title mb-2">Manage Receivers</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">View and manage healthcare facility information with comprehensive details and controls.</p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="loadReceivers()" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-list mr-2"></i>
+              View All Receivers
+            </button>
+            <button onclick="showReceiverStats()" class="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-chart-bar mr-2"></i>
+              Receiver Statistics
+            </button>
+          </div>
+        </div>
+
+        <!-- System Users Management -->
+        <div class="bg-white rounded-xl shadow-xl p-8 admin-card floating-animation" style="animation-delay: 1s;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full mb-4 card-icon">
+              <i class="fas fa-users-cog text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold card-title mb-2">System Users</h3>
+            <p class="text-gray-600 text-sm leading-relaxed">Manage system users and their roles with advanced administrative tools.</p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="loadSystemUsers()" class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-list mr-2"></i>
+              View All Users
+            </button>
+            <button onclick="showAddUserForm()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-lg card-button shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-user-plus mr-2"></i>
+              Add New User
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Slots Table -->
+      <div id="appointmentSlotsSection" class="mt-8 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 admin-card">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <i class="fas fa-calendar-alt text-red-600 mr-2"></i>
+              Appointment Slots
+            </h3>
+            <button onclick="hideAppointmentSlots()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <div id="appointmentSlotsTable" class="overflow-x-auto">
+            <!-- Slots will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Donors Table -->
+      <div id="donorsSection" class="mt-8 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 admin-card">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <i class="fas fa-user-heart text-red-600 mr-2"></i>
+              Donors
+            </h3>
+            <button onclick="hideDonors()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <div id="donorsTable" class="overflow-x-auto">
+            <!-- Donors will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Receivers Table -->
+      <div id="receiversSection" class="mt-8 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 admin-card">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <i class="fas fa-hospital text-red-600 mr-2"></i>
+              Receivers
+            </h3>
+            <button onclick="hideReceivers()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <div id="receiversTable" class="overflow-x-auto">
+            <!-- Receivers will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- System Users Table -->
+      <div id="systemUsersSection" class="mt-8 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 admin-card">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-900">
+              <i class="fas fa-users text-red-600 mr-2"></i>
+              System Users
+            </h3>
+            <button onclick="hideSystemUsers()" class="text-gray-400 hover:text-gray-600">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          <div id="systemUsersTable" class="overflow-x-auto">
+            <!-- Users will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Slot Modal -->
+  <div id="addSlotModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Add New Appointment Slot</h3>
+          <button onclick="hideAddSlotForm()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="addSlotForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input type="date" name="slotDate" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+              <input type="time" name="startTime" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+              <input type="time" name="endTime" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+            <input type="text" name="location" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Donation Center">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Max Donors</label>
+            <input type="number" name="maxDonors" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Available Donors</label>
+            <input type="number" name="availableDonors" required min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div class="flex space-x-3 pt-4">
+            <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Add Slot
+            </button>
+            <button type="button" onclick="hideAddSlotForm()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div id="addUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Add New System User</h3>
+          <button onclick="hideAddUserForm()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="addUserForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">User ID</label>
+            <input type="text" name="userId" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="e.g., ADMIN001">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <input type="text" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Full Name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input type="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="">Select Role</option>
+              <option value="admin">Admin</option>
+              <option value="hospital staff">Hospital Staff</option>
+              <option value="customer support">Customer Support</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="email@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <input type="text" name="department" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Department">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">NIC</label>
+            <input type="text" name="nic" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="National ID">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select name="isActive" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="Active" selected>Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="flex space-x-3 pt-4">
+            <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Add User
+            </button>
+            <button type="button" onclick="hideAddUserForm()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Donor Modal -->
+  <div id="editDonorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Edit Donor Information</h3>
+          <button onclick="hideEditDonorForm()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <form id="editDonorForm" class="space-y-4">
+          <input type="hidden" name="nic" id="editDonorNic">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <input type="text" name="fullName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Full Name">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <input type="date" name="dateOfBirth" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <select name="gender" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Blood Type</label>
+            <select name="bloodType" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="">Select Blood Type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+            <input type="tel" name="contactNumber" required pattern="[0-9]{10}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="10-digit number">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="email@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <textarea name="address" required rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Full Address"></textarea>
+          </div>
+          <div class="flex space-x-3 pt-4">
+            <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Update Donor
+            </button>
+            <button type="button" onclick="hideEditDonorForm()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Load appointment slots
+    async function loadAppointmentSlots() {
+      try {
+        console.log('🔍 Loading appointment slots...');
+        const response = await fetch('/admin/appointment-slots');
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const slots = await response.json();
+        console.log('📊 Received slots:', slots);
+        
+        const table = document.getElementById('appointmentSlotsTable');
+        if (!slots || slots.length === 0) {
+          table.innerHTML = '<p class="text-gray-500 text-center py-4">No appointment slots found. <a href="/admin/test-slots" target="_blank" class="text-blue-600 underline">Test API</a></p>';
+        } else {
+          table.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-hashtag mr-1"></i>Slot ID
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-calendar mr-1"></i>Date
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-clock mr-1"></i>Time
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-map-marker-alt mr-1"></i>Location
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-users mr-1"></i>Available
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <i class="fas fa-cogs mr-1"></i>Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${slots.map(slot => `
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <i class="fas fa-hashtag mr-1"></i>
+                        ${slot.slotId}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${slot.slotDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${slot.slotTime || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${slot.location}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${slot.availableDonors > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        <i class="fas fa-users mr-1"></i>
+                        ${slot.availableDonors}/${slot.maxDonors}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onclick="deleteSlot(${slot.slotId})" class="text-red-600 hover:text-red-900 transition duration-150" title="Delete Slot">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        
+        document.getElementById('appointmentSlotsSection').classList.remove('hidden');
+      } catch (error) {
+        console.error('❌ Error loading appointment slots:', error);
+        const table = document.getElementById('appointmentSlotsTable');
+        table.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-red-600 mb-4">Error loading appointment slots:</p>
+            <p class="text-gray-600 text-sm mb-4">${error.message}</p>
+            <div class="space-x-4">
+              <button onclick="loadAppointmentSlots()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                Retry
+              </button>
+              <a href="/admin/test-slots" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md inline-block">
+                Test API
+              </a>
+            </div>
+          </div>
+        `;
+        document.getElementById('appointmentSlotsSection').classList.remove('hidden');
+      }
+    }
+
+    // Hide appointment slots
+    function hideAppointmentSlots() {
+      document.getElementById('appointmentSlotsSection').classList.add('hidden');
+    }
+
+    // Show add slot form
+    function showAddSlotForm() {
+      document.getElementById('addSlotModal').classList.remove('hidden');
+    }
+
+    // Hide add slot form
+    function hideAddSlotForm() {
+      document.getElementById('addSlotModal').classList.add('hidden');
+      document.getElementById('addSlotForm').reset();
+    }
+
+    // Delete slot
+    async function deleteSlot(slotId) {
+      if (confirm('Are you sure you want to delete this appointment slot?')) {
+        try {
+          const response = await fetch(`/admin/appointment-slots/${slotId}`, {
+            method: 'DELETE'
+          });
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('Appointment slot deleted successfully.');
+            loadAppointmentSlots(); // Refresh the list
+          } else {
+            alert('Error deleting appointment slot: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error deleting appointment slot:', error);
+          alert('Error deleting appointment slot. Please try again.');
+        }
+      }
+    }
+
+    // Add slot form submission
+    document.getElementById('addSlotForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const startTime = formData.get('startTime');
+      const endTime = formData.get('endTime');
+      
+      // Validate time range
+      if (startTime >= endTime) {
+        alert('End time must be after start time.');
+        return;
+      }
+      
+      const slotData = {
+        slotDate: formData.get('slotDate'),
+        startTime: startTime,
+        endTime: endTime,
+        location: formData.get('location'),
+        maxDonors: parseInt(formData.get('maxDonors')),
+        availableDonors: parseInt(formData.get('availableDonors'))
+      };
+      
+      try {
+        const response = await fetch('/admin/appointment-slots', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(slotData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Appointment slot added successfully.');
+          hideAddSlotForm();
+          loadAppointmentSlots(); // Refresh the list
+        } else {
+          alert('Error adding appointment slot: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error adding appointment slot:', error);
+        alert('Error adding appointment slot. Please try again.');
+      }
+    });
+
+    // Load system users
+    async function loadSystemUsers() {
+      try {
+        const response = await fetch('/admin/system-users');
+        const users = await response.json();
+        
+        const table = document.getElementById('systemUsersTable');
+        if (users.length === 0) {
+          table.innerHTML = '<p class="text-gray-500 text-center py-4">No system users found.</p>';
+        } else {
+          table.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${users.map(user => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.userId}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}">
+                        ${user.role}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.department || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.isActive === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                        ${user.isActive}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button onclick="deleteUser('${user.userId}')" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        
+        document.getElementById('systemUsersSection').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error loading system users:', error);
+        alert('Error loading system users. Please try again.');
+      }
+    }
+
+    // Get role color for badges
+    function getRoleColor(role) {
+      switch (role.toLowerCase()) {
+        case 'admin': return 'bg-red-100 text-red-800';
+        case 'hospital staff': return 'bg-blue-100 text-blue-800';
+        case 'customer support': return 'bg-green-100 text-green-800';
+        case 'doctor': return 'bg-purple-100 text-purple-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    // Hide system users
+    function hideSystemUsers() {
+      document.getElementById('systemUsersSection').classList.add('hidden');
+    }
+
+    // Show add user form
+    function showAddUserForm() {
+      document.getElementById('addUserModal').classList.remove('hidden');
+    }
+
+    // Hide add user form
+    function hideAddUserForm() {
+      document.getElementById('addUserModal').classList.add('hidden');
+      document.getElementById('addUserForm').reset();
+    }
+
+    // Delete user
+    async function deleteUser(userId) {
+      if (confirm('Are you sure you want to delete this system user? This action cannot be undone.')) {
+        try {
+          const response = await fetch(`/admin/system-users/${userId}`, {
+            method: 'DELETE'
+          });
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('System user deleted successfully.');
+            loadSystemUsers(); // Refresh the list
+          } else {
+            alert('Error deleting system user: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error deleting system user:', error);
+          alert('Error deleting system user. Please try again.');
+        }
+      }
+    }
+
+    // Add user form submission
+    document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const userData = {
+        userId: formData.get('userId'),
+        username: formData.get('username'),
+        password: formData.get('password'),
+        role: formData.get('role'),
+        email: formData.get('email'),
+        department: formData.get('department'),
+        nic: formData.get('nic'),
+        isActive: formData.get('isActive')
+      };
+      
+      try {
+        const response = await fetch('/admin/system-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('System user added successfully.');
+          hideAddUserForm();
+          loadSystemUsers(); // Refresh the list
+        } else {
+          alert('Error adding system user: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error adding system user:', error);
+        alert('Error adding system user. Please try again.');
+      }
+    });
+
+    // Load donors
+    async function loadDonors() {
+      try {
+        const response = await fetch('/admin/donors');
+        const donors = await response.json();
+        
+        const table = document.getElementById('donorsTable');
+        if (donors.length === 0) {
+          table.innerHTML = '<p class="text-gray-500 text-center py-4">No donors found.</p>';
+        } else {
+          table.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIC</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${donors.map(donor => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${donor.nic}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${donor.fullName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${donor.age || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${donor.gender}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getBloodTypeColor(donor.bloodType)}">
+                        ${donor.bloodType}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${donor.contactNumber}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${donor.email || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button onclick="editDonor('${donor.nic}')" class="text-blue-600 hover:text-blue-900">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button onclick="deleteDonor('${donor.nic}')" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        
+        document.getElementById('donorsSection').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error loading donors:', error);
+        alert('Error loading donors. Please try again.');
+      }
+    }
+
+    // Get blood type color for badges
+    function getBloodTypeColor(bloodType) {
+      switch (bloodType) {
+        case 'A+': return 'bg-red-100 text-red-800';
+        case 'A-': return 'bg-red-200 text-red-900';
+        case 'B+': return 'bg-blue-100 text-blue-800';
+        case 'B-': return 'bg-blue-200 text-blue-900';
+        case 'AB+': return 'bg-purple-100 text-purple-800';
+        case 'AB-': return 'bg-purple-200 text-purple-900';
+        case 'O+': return 'bg-green-100 text-green-800';
+        case 'O-': return 'bg-green-200 text-green-900';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    // Hide donors
+    function hideDonors() {
+      document.getElementById('donorsSection').classList.add('hidden');
+    }
+
+    // Load receivers
+    async function loadReceivers() {
+      try {
+        const response = await fetch('/admin/receivers');
+        const receivers = await response.json();
+        
+        const table = document.getElementById('receiversTable');
+        if (receivers.length === 0) {
+          table.innerHTML = '<p class="text-gray-500 text-center py-4">No receivers found.</p>';
+        } else {
+          table.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CNIC</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Type Needed</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hospital</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${receivers.map(receiver => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${receiver.nic}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${receiver.fullName}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${receiver.gender}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getBloodTypeColor(receiver.bloodTypeNeeded)}">
+                        ${receiver.bloodTypeNeeded}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${receiver.contactNumber}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${receiver.hospitalPreference || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${receiver.registrationDate ? new Date(receiver.registrationDate).toLocaleDateString() : '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button onclick="viewReceiver('${receiver.nic}')" class="text-blue-600 hover:text-blue-900">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button onclick="deleteReceiver('${receiver.nic}')" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+        }
+        
+        document.getElementById('receiversSection').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error loading receivers:', error);
+        alert('Error loading receivers. Please try again.');
+      }
+    }
+
+    // Hide receivers
+    function hideReceivers() {
+      document.getElementById('receiversSection').classList.add('hidden');
+    }
+
+    // View receiver details
+    async function viewReceiver(nic) {
+      try {
+        const response = await fetch(`/admin/receivers/${nic}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const receiver = result.receiver;
+          alert(`Receiver Details:\n\nCNIC: ${receiver.nic}\nName: ${receiver.fullName}\nGender: ${receiver.gender}\nBlood Type Needed: ${receiver.bloodTypeNeeded}\nContact: ${receiver.contactNumber}\nEmail: ${receiver.email || 'Not provided'}\nHospital: ${receiver.hospitalPreference || 'Not specified'}\nMedical Condition: ${receiver.medicalCondition || 'None'}\nRegistration Date: ${receiver.registrationDate ? new Date(receiver.registrationDate).toLocaleDateString() : 'Not available'}`);
+        } else {
+          alert('Error loading receiver details: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error viewing receiver:', error);
+        alert('Error loading receiver details. Please try again.');
+      }
+    }
+
+    // Delete receiver
+    async function deleteReceiver(nic) {
+      if (confirm('Are you sure you want to delete this receiver? This action cannot be undone.')) {
+        try {
+          const response = await fetch(`/admin/receivers/${nic}`, {
+            method: 'DELETE'
+          });
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('Receiver deleted successfully.');
+            loadReceivers(); // Refresh the list
+          } else {
+            alert('Error deleting receiver: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error deleting receiver:', error);
+          alert('Error deleting receiver. Please try again.');
+        }
+      }
+    }
+
+    // Show receiver statistics
+    async function showReceiverStats() {
+      try {
+        const response = await fetch('/admin/receiver-count');
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`Receiver Statistics:\n\nTotal Receivers: ${result.count}\n\nThis includes all registered healthcare facilities and emergency services.`);
+        } else {
+          alert('Error loading receiver statistics: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error loading receiver statistics:', error);
+        alert('Error loading receiver statistics. Please try again.');
+      }
+    }
+
+    // Edit donor
+    async function editDonor(nic) {
+      try {
+        const response = await fetch(`/admin/donors/${nic}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const donor = result.donor;
+          
+          // Populate form with donor data
+          document.getElementById('editDonorNic').value = donor.nic;
+          document.querySelector('#editDonorForm input[name="fullName"]').value = donor.fullName;
+          document.querySelector('#editDonorForm input[name="dateOfBirth"]').value = donor.dateOfBirth;
+          document.querySelector('#editDonorForm select[name="gender"]').value = donor.gender;
+          document.querySelector('#editDonorForm select[name="bloodType"]').value = donor.bloodType;
+          document.querySelector('#editDonorForm input[name="contactNumber"]').value = donor.contactNumber;
+          document.querySelector('#editDonorForm input[name="email"]').value = donor.email || '';
+          document.querySelector('#editDonorForm textarea[name="address"]').value = donor.address;
+          
+          // Show modal
+          document.getElementById('editDonorModal').classList.remove('hidden');
+        } else {
+          alert('Error loading donor information: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error loading donor:', error);
+        alert('Error loading donor information. Please try again.');
+      }
+    }
+
+    // Hide edit donor form
+    function hideEditDonorForm() {
+      document.getElementById('editDonorModal').classList.add('hidden');
+      document.getElementById('editDonorForm').reset();
+    }
+
+    // Delete donor
+    async function deleteDonor(nic) {
+      if (confirm('Are you sure you want to delete this donor? This action cannot be undone.')) {
+        try {
+          const response = await fetch(`/admin/donors/${nic}`, {
+            method: 'DELETE'
+          });
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('Donor deleted successfully.');
+            loadDonors(); // Refresh the list
+          } else {
+            alert('Error deleting donor: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error deleting donor:', error);
+          alert('Error deleting donor. Please try again.');
+        }
+      }
+    }
+
+    // Edit donor form submission
+    document.getElementById('editDonorForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const nic = formData.get('nic');
+      const donorData = {
+        fullName: formData.get('fullName'),
+        dateOfBirth: formData.get('dateOfBirth'),
+        gender: formData.get('gender'),
+        bloodType: formData.get('bloodType'),
+        contactNumber: formData.get('contactNumber'),
+        email: formData.get('email'),
+        address: formData.get('address')
+      };
+      
+      try {
+        const response = await fetch(`/admin/donors/${nic}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(donorData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Donor updated successfully.');
+          hideEditDonorForm();
+          loadDonors(); // Refresh the list
+        } else {
+          alert('Error updating donor: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error updating donor:', error);
+        alert('Error updating donor. Please try again.');
+      }
+    });
+
+    // Show system info
+    function showSystemInfo() {
+      alert('System Information:\n\nVersion: 1.0.0\nFramework: Spring Boot\nDatabase: MySQL\nLast Updated: ' + new Date().toLocaleDateString());
+    }
+
+    // Auto-set end time when start time is selected
+    document.addEventListener('DOMContentLoaded', function() {
+      const startTimeInput = document.querySelector('#addSlotForm input[name="startTime"]');
+      const endTimeInput = document.querySelector('#addSlotForm input[name="endTime"]');
+      
+      if (startTimeInput && endTimeInput) {
+        startTimeInput.addEventListener('change', function() {
+          if (this.value && !endTimeInput.value) {
+            // Set end time to 1 hour after start time
+            const startTime = new Date('1970-01-01T' + this.value + ':00');
+            const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Add 1 hour
+            const endTimeString = endTime.toTimeString().slice(0, 5);
+            endTimeInput.value = endTimeString;
+          }
+        });
+        
+        // Validate time range on change
+        endTimeInput.addEventListener('change', function() {
+          if (startTimeInput.value && this.value && this.value <= startTimeInput.value) {
+            alert('End time must be after start time.');
+            this.value = '';
+          }
+        });
+      }
+      
+      // Load donor count
+      loadDonorCount();
+      
+      // Load receiver count
+      loadReceiverCount();
+      
+      console.log('Admin Dashboard loaded');
+    });
+
+    // Function to load donor count
+    async function loadDonorCount() {
+      try {
+        console.log('🔍 Loading donor count...');
+        const response = await fetch('/admin/donor-count');
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('donorCount').textContent = result.count;
+          console.log('📊 Donor count loaded:', result.count);
+        } else {
+          document.getElementById('donorCount').textContent = 'Error';
+          console.error('❌ Error loading donor count:', result.message);
+        }
+      } catch (error) {
+        console.error('❌ Error loading donor count:', error);
+        document.getElementById('donorCount').textContent = 'Error';
+      }
+    }
+
+    // Function to load receiver count
+    async function loadReceiverCount() {
+      try {
+        console.log('🔍 Loading receiver count...');
+        const response = await fetch('/admin/receiver-count');
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('receiverCount').textContent = result.count;
+          console.log('📊 Receiver count loaded:', result.count);
+        } else {
+          document.getElementById('receiverCount').textContent = 'Error';
+          console.error('❌ Error loading receiver count:', result.message);
+        }
+      } catch (error) {
+        console.error('❌ Error loading receiver count:', error);
+        document.getElementById('receiverCount').textContent = 'Error';
+      }
+    }
+  </script>
+</body>
+</html>

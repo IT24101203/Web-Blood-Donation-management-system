@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">BloodLife Customer Care</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff; /* White background */
+            color: #333;
+        }
+        h1 {
+            color: #dc143c; /* Crimson red for header */
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(220, 20, 60, 0.1);
+        }
+        h2 {
+            color: #b22222; /* Firebrick red */
+            border-bottom: 2px solid #dc143c;
+            padding-bottom: 5px;
+        }
+        p {
+            color: #555;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(220, 20, 60, 0.1); /* Subtle red shadow */
+            border: 1px solid #ffe6e6; /* Light red border */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #dc143c; /* Red labels */
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #dc143c; /* Red border */
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #fff;
+            color: #333;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #b22222;
+            box-shadow: 0 0 5px rgba(220, 20, 60, 0.3);
+        }
+        select {
+            appearance: none;
+            background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><polygon fill="%23dc143c" points="0,0 12,0 6,12"/></svg>') no-repeat right 10px center;
+            background-size: 12px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button[type="reset"] {
+            background-color: #f8f8f8;
+            color: #666;
+            border: 1px solid #ccc;
+        }
+        button[type="submit"] {
+            background-color: #dc143c; /* Red button */
+            color: #ffffff; /* White text */
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .home-button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .home-button:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .success-message {
+            background-color: #ffe6e6; /* Light red background */
+            padding: 10px;
+            border-radius: 4px;
+            color: #dc143c;
+            text-align: center;
+            border: 1px solid #dc143c;
+        }
+        .alternative-contact {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #dc143c;
+        }
+        .alternative-contact div {
+            margin-bottom: 10px;
+        }
+        ul {
+            color: #555;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        
+        /* Message History Styles */
+        .message-history {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .message-item {
+            background-color: #fff;
+            border: 1px solid #dc143c;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(220, 20, 60, 0.1);
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ffe6e6;
+        }
+        
+        .message-subject {
+            font-weight: bold;
+            color: #dc143c;
+            font-size: 18px;
+        }
+        
+        .message-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .priority-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .priority-high {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .priority-medium {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+        }
+        
+        .priority-low {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ffcc02;
+        }
+        
+        .status-replied {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .message-content {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .reply-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid #dc143c;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .reply-header {
+            font-weight: bold;
+            color: #dc143c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reply-content {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .no-messages {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .toggle-messages {
+            background-color: #dc143c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-messages:hover {
+            background-color: #b22222;
+        }
+        
+        .messages-container {
+            display: none;
+        }
+        
+        .messages-container.show {
+            display: block;
+        }
+        
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+        
+        .message-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+<div style="margin-bottom: 20px;">
+    <a href="/dashboard" class="home-button" style="margin-bottom: 20px; display: inline-block;">← Go to Dashboard</a>
+</div>
+
+<div>
+    <h1>BloodLife Customer Care</h1>
+    <div th:if="${donor != null}">
+        <p>Welcome back, <strong th:text="${donor.fullName}">Donor Name</strong>! We're here to assist with all your blood donation needs—let's make a difference together!</p>
+        <p class="success-message" style="background-color: #e8f5e8; color: #2d5a2d; padding: 10px; border-radius: 4px; border: 1px solid #4caf50;">
+            <strong>✓ Your information has been automatically filled in below.</strong> Please review and complete the remaining fields.
+        </p>
+    </div>
+    <div th:if="${donor == null}">
+        <p>We're here to assist with all your blood donation needs—let's make a difference together!</p>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div th:if="${successMessage}" class="success-message" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;">
+    <p><strong>✓ Message Sent Successfully!</strong> <span th:text="${successMessage}">Our team will get back to you within 24 hours.</span></p>
+    <p th:if="${messageId}" style="font-size: 0.9em; margin-top: 5px;">Reference ID: <strong th:text="${messageId}"></strong></p>
+</div>
+
+<!-- Error Message -->
+<div th:if="${errorMessage}" class="success-message" style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;">
+    <p><strong>❌ Error:</strong> <span th:text="${errorMessage}">Failed to send your message. Please try again.</span></p>
+</div>
+
+<!-- Message History Section -->
+<div th:if="${donor != null}" class="message-history">
+    <h2>📬 Your Support Messages</h2>
+    <div th:if="${showAllMessages}" class="success-message" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; margin-bottom: 15px;">
+        <strong>ℹ️ Testing Mode:</strong> No messages found for your account, showing all messages in the database for testing purposes.
+    </div>
+    <button class="toggle-messages" onclick="toggleMessages()">
+        <span id="toggleText">Show Message History</span>
+    </button>
+    
+    <div id="messagesContainer" class="messages-container">
+        <div th:if="${messages != null and !messages.empty}">
+            <div th:each="message : ${messages}" class="message-item">
+                <div class="message-header">
+                    <div class="message-subject" th:text="${message.subject}">Subject</div>
+                    <div class="message-actions">
+                        <div class="message-meta">
+                            <span class="priority-badge priority-${message.priority.name().toLowerCase()}" 
+                                  th:text="${message.priority.name()}">Priority</span>
+                            <span class="status-badge" 
+                                  th:classappend="${message.replyText != null ? 'status-replied' : 'status-pending'}"
+                                  th:text="${message.replyText != null ? 'Replied' : 'Pending'}">Status</span>
+                            <span th:text="${#temporals.format(message.messageDate, 'MMM dd, yyyy HH:mm')}">Date</span>
+                        </div>
+                        <button class="delete-button" 
+                                th:data-message-id="${message.messageId}"
+                                th:data-message-subject="${message.subject}"
+                                onclick="confirmDeleteMessage(this)"
+                                title="Delete this message">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="message-content" th:text="${message.messageText}">Message content</div>
+                
+                <!-- Reply Section -->
+                <div th:if="${message.replyText != null}" class="reply-section">
+                    <div class="reply-header">
+                        <span>💬</span>
+                        <span>Support Team Reply</span>
+                        <span style="font-size: 12px; font-weight: normal; color: #666;" 
+                              th:text="'(' + ${#temporals.format(message.replyDate, 'MMM dd, yyyy HH:mm')} + ')'">(Date)</span>
+                    </div>
+                    <div class="reply-content" th:text="${message.replyText}">Reply content</div>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${messages == null or messages.empty}" class="no-messages">
+            <h3>📭 No messages yet</h3>
+            <p>You haven't sent any support messages yet. Use the form below to contact our support team!</p>
+        </div>
+    </div>
+</div>
+
+<div>
+    <h2>How to Reach Us</h2>
+    <ul>
+        <li>Complete all required fields marked with *</li>
+        <li>Choose the priority level that best fits your inquiry</li>
+        <li>Share detailed information so we can assist you promptly</li>
+        <li>Standard inquiries receive a response within 24 hours</li>
+        <li>High-priority requests are addressed within 2-4 hours</li>
+    </ul>
+</div>
+
+<div>
+    <form action="/donor-support" method="POST">
+        <div>
+            <label for="nic">National Identity Card (NIC) *</label>
+            <input type="text" id="nic" name="nic" placeholder="Enter your NIC number" 
+                   th:value="${donor != null ? donor.nic : ''}" required>
+            <p>Please enter a valid NIC number</p>
+        </div>
+
+        <div>
+            <label for="fullName">Full Name *</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" 
+                   th:value="${donor != null ? donor.fullName : ''}" required>
+            <p>Please enter your full name</p>
+        </div>
+
+        <div>
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email address" 
+                   th:value="${donor != null ? donor.email : ''}" required>
+            <p>Please enter a valid email address</p>
+        </div>
+
+        <div>
+            <label for="priority">Priority Level *</label>
+            <select id="priority" name="priority" required>
+                <option value="" disabled selected>Select Priority Level</option>
+                <option value="high">High Priority - Urgent issues or appointment concerns</option>
+                <option value="medium">Medium Priority - General questions or eligibility inquiries</option>
+                <option value="low">Low Priority - Information requests or feedback</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="subject">Subject *</label>
+            <input type="text" id="subject" name="subject" placeholder="Briefly describe your inquiry" required>
+            <p>Please enter a subject for your message</p>
+        </div>
+
+        <div>
+            <label for="message">Your Message *</label>
+            <textarea id="message" name="message" placeholder="Tell us how we can help you..." required minlength="10" maxlength="1000"></textarea>
+            <p><span id="charCount">0/1000 characters</span></p>
+            <p>Please enter your message (minimum 10 characters)</p>
+        </div>
+
+        <div>
+            <p>Your information is secure and will only be used to respond to your inquiry.</p>
+            <button type="reset">Clear Form</button>
+            <button type="submit">Send Message</button>
+            <a href="/dashboard" class="home-button">Go to Dashboard</a>
+        </div>
+    </form>
+</div>
+
+<div class="alternative-contact">
+    <h2>Other Ways to Connect</h2>
+    <div>
+        <p><strong>Hotline</strong></p>
+        <p>117 (Available 24/7)</p>
+    </div>
+    <div>
+        <p><strong>Email</strong></p>
+        <p>support@bloodlife.lk</p>
+    </div>
+    <div>
+        <p><strong>Response Time</strong></p>
+        <p>2-24 hours</p>
+    </div>
+</div>
+
+<script>
+    const textarea = document.getElementById('message');
+    const charCount = document.getElementById('charCount');
+    textarea.addEventListener('input', () => {
+        charCount.textContent = `${textarea.value.length}/1000 characters`;
+    });
+    
+    // Toggle message history visibility
+    function toggleMessages() {
+        const container = document.getElementById('messagesContainer');
+        const toggleText = document.getElementById('toggleText');
+        
+        if (container.classList.contains('show')) {
+            container.classList.remove('show');
+            toggleText.textContent = 'Show Message History';
+        } else {
+            container.classList.add('show');
+            toggleText.textContent = 'Hide Message History';
+        }
+    }
+    
+    // Auto-show messages if there are any
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('messagesContainer');
+        const hasMessages = container.querySelector('.message-item') !== null;
+        
+        if (hasMessages) {
+            container.classList.add('show');
+            document.getElementById('toggleText').textContent = 'Hide Message History';
+        }
+    });
+    
+    // Confirm and delete message
+    function confirmDeleteMessage(button) {
+        const messageId = button.getAttribute('data-message-id');
+        const subject = button.getAttribute('data-message-subject');
+        
+        console.log('Delete button clicked:', { messageId, subject });
+        
+        const confirmed = confirm(`Are you sure you want to delete the message "${subject}"?\n\nThis action cannot be undone.`);
+        
+        if (confirmed) {
+            console.log('User confirmed deletion, submitting form...');
+            
+            // Create a form to submit the delete request
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/donor-support/delete/${messageId}`;
+            
+            // Add CSRF token if available
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_csrf';
+                csrfInput.value = csrfToken.getAttribute('content');
+                form.appendChild(csrfInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+        } else {
+            console.log('User cancelled deletion');
+        }
+    }
+</script>
+</body>
+</html>

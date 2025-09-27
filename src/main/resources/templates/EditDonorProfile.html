@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - LifeBlood Donation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .blood-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+        }
+        .blood-drop {
+            animation: drip 3s ease-in-out infinite;
+        }
+        @keyframes drip {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(5px); }
+        }
+        .pulse-heart {
+            animation: pulse-beat 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .blood-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fee2e2' fill-opacity='0.1'%3E%3Cpath d='M10 3.5c0-2.5 2.5-2.5 2.5 0s-2.5 4.5-2.5 7-2.5-4.5-2.5-7S10 1 10 3.5z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .form-shadow {
+            box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.1), 0 10px 10px -5px rgba(220, 38, 38, 0.04);
+        }
+        .input-focus:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+        .form-field-animation {
+            transition: all 0.3s ease;
+        }
+        .form-field-animation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 to-rose-100 min-h-screen blood-pattern">
+<!-- Header -->
+<header class="blood-gradient shadow-2xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-10"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-6">
+            <div class="flex items-center">
+                <div class="relative">
+                    <i class="fas fa-tint text-white text-3xl mr-4 blood-drop"></i>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full opacity-60"></div>
+                </div>
+                <div>
+                    <h1 class="text-white text-2xl font-bold tracking-wide">LifeBlood</h1>
+                    <p class="text-red-100 text-sm">Donation System</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/dashboard" class="bg-red-700 hover:bg-red-800 text-white px-6 py-2 rounded-full transition duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Title -->
+    <div class="text-center mb-8">
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Edit Your Profile</h2>
+        <p class="text-lg text-gray-600">Update your information to keep your donor profile current</p>
+        <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-700 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <div class="bg-white rounded-2xl form-shadow p-8 border border-red-100 relative overflow-hidden">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-100 to-transparent rounded-full -mr-16 -mt-16 opacity-50"></div>
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-red-100 to-transparent rounded-full -ml-12 -mb-12 opacity-50"></div>
+
+        <form action="/donor/update-profile" method="POST" id="editProfileForm" th:object="${donor}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- NIC (Read-only) -->
+                <div>
+                    <label for="nic" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-id-card text-red-500 mr-2"></i>
+                        NIC (National Identity Card)
+                    </label>
+                    <input
+                            type="text"
+                            id="nic"
+                            name="nic"
+                            th:value="${donor.nic}"
+                            readonly
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                    >
+                    <small class="text-gray-500">NIC cannot be changed</small>
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <label for="fullName" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-user text-red-500 mr-2"></i>
+                        Full Name <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                            type="text"
+                            id="fullName"
+                            name="fullName"
+                            th:value="${donor.fullName}"
+                            required
+                            placeholder="Enter your full name"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                </div>
+
+                <!-- Date of Birth -->
+                <div>
+                    <label for="dateOfBirth" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-birthday-cake text-red-500 mr-2"></i>
+                        Date of Birth <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                            type="date"
+                            id="dateOfBirth"
+                            name="dateOfBirth"
+                            th:value="${donor.dateOfBirth}"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                </div>
+
+                <!-- Age Display -->
+                <div>
+                    <label for="age" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-calendar text-red-500 mr-2"></i>
+                        Age
+                    </label>
+                    <input
+                            type="number"
+                            id="age"
+                            name="age"
+                            th:value="${donor.age}"
+                            readonly
+                            placeholder="Age will be calculated"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                    >
+                </div>
+
+                <!-- Gender -->
+                <div>
+                    <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-venus-mars text-red-500 mr-2"></i>
+                        Gender <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                            id="gender"
+                            name="gender"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                        <option value="">Select Gender</option>
+                        <option value="Male" th:selected="${donor.gender == 'Male'}">Male</option>
+                        <option value="Female" th:selected="${donor.gender == 'Female'}">Female</option>
+                        <option value="Other" th:selected="${donor.gender == 'Other'}">Other</option>
+                    </select>
+                </div>
+
+                <!-- Blood Type -->
+                <div>
+                    <label for="bloodType" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-tint text-red-500 mr-2"></i>
+                        Blood Type <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                            id="bloodType"
+                            name="bloodType"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                        <option value="">Select Blood Type</option>
+                        <option value="A+" th:selected="${donor.bloodType == 'A+'}">A+</option>
+                        <option value="A-" th:selected="${donor.bloodType == 'A-'}">A-</option>
+                        <option value="B+" th:selected="${donor.bloodType == 'B+'}">B+</option>
+                        <option value="B-" th:selected="${donor.bloodType == 'B-'}">B-</option>
+                        <option value="O+" th:selected="${donor.bloodType == 'O+'}">O+</option>
+                        <option value="O-" th:selected="${donor.bloodType == 'O-'}">O-</option>
+                        <option value="AB+" th:selected="${donor.bloodType == 'AB+'}">AB+</option>
+                        <option value="AB-" th:selected="${donor.bloodType == 'AB-'}">AB-</option>
+                    </select>
+                </div>
+
+                <!-- Contact Number -->
+                <div>
+                    <label for="contactNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-phone text-red-500 mr-2"></i>
+                        Contact Number <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                            type="tel"
+                            id="contactNumber"
+                            name="contactNumber"
+                            th:value="${donor.contactNumber}"
+                            required
+                            placeholder="Enter your mobile number"
+                            pattern="[0-9]{10}"
+                            title="Enter 10-digit mobile number"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                </div>
+
+                <!-- Email Address -->
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-envelope text-red-500 mr-2"></i>
+                        Email Address <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            th:value="${donor.email}"
+                            placeholder="Enter your email address"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                    >
+                    <small class="text-gray-500">For donation reminders and notifications</small>
+                </div>
+
+                <!-- Address -->
+                <div class="md:col-span-2">
+                    <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                        Address <span class="text-red-500">*</span>
+                    </label>
+                    <textarea
+                            id="address"
+                            name="address"
+                            required
+                            rows="3"
+                            th:text="${donor.address}"
+                            placeholder="Enter your complete address (Street, City, Province)"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation resize-none"
+                    ></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="md:col-span-2">
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <button
+                                type="submit"
+                                class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-4 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                        >
+                            <span class="flex items-center justify-center">
+                                <i class="fas fa-save mr-2"></i>
+                                Update Profile
+                            </span>
+                        </button>
+                        <a href="/dashboard" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center">
+                            <span class="flex items-center justify-center">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Information Box -->
+    <div class="mt-8 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>
+            Profile Update Information
+        </h3>
+        <ul class="text-red-700 space-y-2">
+            <li>• Your NIC number cannot be changed as it serves as your unique donor identification</li>
+            <li>• Age will be automatically calculated based on your date of birth</li>
+            <li>• Please ensure all information is accurate and up-to-date</li>
+            <li>• Changes will be reflected immediately in your donor profile</li>
+            <li>• Contact information is important for appointment notifications</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Age calculation based on date of birth
+    document.getElementById('dateOfBirth').addEventListener('change', function() {
+        const dob = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        document.getElementById('age').value = age >= 0 ? age : '';
+    });
+
+    // Form validation
+    document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+        // Age validation (must be 18-65)
+        const age = parseInt(document.getElementById('age').value);
+
+        if (age < 18 || age > 65) {
+            e.preventDefault();
+            alert('You must be between 18 and 65 years old to be a donor.');
+            return false;
+        }
+
+        // Phone number validation
+        const phone = document.getElementById('contactNumber').value;
+        const phonePattern = /^[0-9]{10}$/;
+
+        if (!phonePattern.test(phone)) {
+            e.preventDefault();
+            alert('Please enter a valid 10-digit mobile number.');
+            return false;
+        }
+
+        return true;
+    });
+
+    // Phone number formatting (10 digits only)
+    document.getElementById('contactNumber').addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        this.value = value;
+    });
+
+    // Show loading state on form submission
+    document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+        submitBtn.disabled = true;
+        
+        // Re-enable after 3 seconds in case of error
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+</script>
+</body>
+</html>
+

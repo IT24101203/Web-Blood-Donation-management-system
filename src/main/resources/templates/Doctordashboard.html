@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title}">Doctor Dashboard - LifeBlood Donation System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+    .blood-gradient {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+    }
+    .floating-card {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      transition: transform 0.3s ease;
+    }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="min-h-screen bg-gradient-to-br from-red-50 to-red-100">
+  <!-- Header -->
+  <header class="blood-gradient shadow-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-user-md text-white text-4xl mr-4"></i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Doctor Dashboard</h1>
+            <p class="text-red-100 text-sm">Medical Professional Portal</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="text-white text-sm">Welcome, <span th:text="${userFullName}">Dr. Smith</span></span>
+          <a href="/staff/logout" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-150">
+            <i class="fas fa-sign-out-alt mr-2"></i>
+            Logout
+          </a>
+        </div>
+        </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Health Assessments Card -->
+      <div class="bg-white rounded-xl shadow-xl p-6 hover-lift floating-card" style="animation-delay: 0s;">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-clipboard-check text-green-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Health Assessments</p>
+            <p class="text-2xl font-bold text-gray-900" id="healthAssessmentsCount">-</p>
+            </div>
+          </div>
+    </div>
+
+      <!-- Pending Reviews Card -->
+      <div class="bg-white rounded-xl shadow-xl p-6 hover-lift floating-card" style="animation-delay: 1s;">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-clock text-blue-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Pending Reviews</p>
+            <p class="text-2xl font-bold text-gray-900" id="pendingReviewsCount">-</p>
+            </div>
+          </div>
+        </div>
+
+      <!-- Today's Appointments Card -->
+      <div class="bg-white rounded-xl shadow-xl p-6 hover-lift floating-card" style="animation-delay: 2s;">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-calendar-day text-purple-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Today's Appointments</p>
+            <p class="text-2xl font-bold text-gray-900" id="todayAppointmentsCount">-</p>
+            </div>
+          </div>
+        </div>
+
+      <!-- This Month Card -->
+      <div class="bg-white rounded-xl shadow-xl p-6 hover-lift floating-card" style="animation-delay: 3s;">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+            </div>
+            </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">This Month</p>
+            <p class="text-2xl font-bold text-gray-900" id="thisMonthCount">-</p>
+        </div>
+    </div>
+      </div>
+      </div>
+
+    <!-- Main Functionality Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
+      
+      <!-- Health Assessments Card -->
+      <div class="bg-green-200 border-8 border-green-600 rounded-xl shadow-2xl p-8 hover-lift" style="background-color: #dcfce7 !important; border: 8px solid #16a34a !important;">
+          <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
+            <i class="fas fa-stethoscope text-white text-2xl"></i>
+            </div>
+          <h3 class="text-2xl font-bold text-green-800 mb-2">Health Assessments</h3>
+          <p class="text-gray-700 text-sm">Review and approve donor health assessments.</p>
+          </div>
+          <div class="space-y-3">
+          <button onclick="loadHealthAssessments()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-list mr-2"></i>
+              View All Assessments
+            </button>
+          <button onclick="loadPendingAssessments()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-clock mr-2"></i>
+              Pending Reviews
+            </button>
+          </div>
+        </div>
+
+      <!-- Donor Management Card -->
+      <div class="bg-blue-200 border-8 border-blue-600 rounded-xl shadow-2xl p-8 hover-lift" style="background-color: #dbeafe !important; border: 8px solid #2563eb !important;">
+          <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+            <i class="fas fa-users text-white text-2xl"></i>
+            </div>
+          <h3 class="text-2xl font-bold text-blue-800 mb-2">Donor Management</h3>
+          <p class="text-gray-700 text-sm">Access donor information and medical records.</p>
+          </div>
+          <div class="space-y-3">
+          <button onclick="loadAllDonors()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-users mr-2"></i>
+              View All Donors
+            </button>
+          <button onclick="showDonorSearch()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg">
+            <i class="fas fa-search mr-2"></i>
+            Search Donor
+            </button>
+            </div>
+        </div>
+
+        <!-- Doctor Notes Card -->
+      <div class="bg-red-200 border-8 border-red-600 rounded-xl shadow-2xl p-8 hover-lift" style="background-color: #fecaca !important; border: 8px solid #dc2626 !important;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-full mb-4">
+              <i class="fas fa-file-medical-alt text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-red-800 mb-2">Doctor Notes</h3>
+            <p class="text-gray-700 text-sm">Record medical observations and post-donation notes for donors.</p>
+          </div>
+          <div class="space-y-3">
+          <button onclick="showDoctorNotesForm()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-plus mr-2"></i>
+              Add Doctor Notes
+            </button>
+            <button onclick="showDoctorNotesTable()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-history mr-2"></i>
+              View Notes History
+            </button>
+          </div>
+        </div>
+
+        <!-- Blood Inventory Card -->
+        <div class="bg-purple-200 border-8 border-purple-600 rounded-xl shadow-2xl p-8 hover-lift" style="background-color: #e9d5ff !important; border: 8px solid #7c3aed !important;">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-4">
+              <i class="fas fa-tint text-white text-2xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-purple-800 mb-2">Blood Inventory</h3>
+            <p class="text-gray-700 text-sm">Monitor blood stock levels and availability.</p>
+          </div>
+          <div class="space-y-3">
+            <button onclick="showBloodInventory()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-chart-bar mr-2"></i>
+              View Inventory
+            </button>
+            <button onclick="showBloodStockLevels()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              Stock Alerts
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Doctor Notes Form Section -->
+      <div id="doctorNotesFormSection" class="mt-8 bg-white rounded-xl shadow-xl p-8" style="display: none;">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-3xl font-bold text-red-600">
+            <i class="fas fa-notes-medical mr-3"></i>
+            Doctor Notes
+          </h2>
+          <button onclick="hideDoctorNotesForm()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+
+        <form id="doctorNotesForm" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Left Column -->
+          <div class="space-y-6">
+            <!-- Donor NIC -->
+            <div>
+              <label for="donorNic" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-id-card text-blue-600 mr-2"></i>
+                Donor NIC
+              </label>
+              <input type="text" id="donorNic" name="donorNic" placeholder="Enter Donor NIC" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150">
+            </div>
+
+            <!-- Outcome -->
+            <div>
+              <label for="outcome" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                Outcome
+              </label>
+              <select id="outcome" name="outcome" 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150">
+                <option value="Successful">Successful</option>
+                <option value="Deferred">Deferred</option>
+                <option value="Incomplete">Incomplete</option>
+                <option value="Adverse Reaction">Adverse Reaction</option>
+              </select>
+            </div>
+
+            <!-- Reason for Deferral -->
+            <div>
+              <label for="reasonForDeferral" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                Reason for Deferral (if any)
+              </label>
+              <input type="text" id="reasonForDeferral" name="reasonForDeferral" placeholder="e.g., Low Hb" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150">
+            </div>
+
+            <!-- Recovery Advice -->
+            <div>
+              <label for="recoveryAdvice" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-heart text-green-600 mr-2"></i>
+                Recovery Advice
+              </label>
+              <input type="text" id="recoveryAdvice" name="recoveryAdvice" placeholder="e.g., rest 15 min, hydrate" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150">
+            </div>
+
+            <!-- Save Note Button -->
+            <button type="button" onclick="saveDoctorNote()" 
+                    class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+              <i class="fas fa-save mr-2"></i>
+              Save Note
+            </button>
+          </div>
+
+          <!-- Right Column -->
+          <div class="space-y-6">
+          <!-- Immediate Reaction -->
+          <div>
+            <label for="immediateReaction" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>
+              Immediate Reaction (if any)
+            </label>
+            <input type="text" id="immediateReaction" name="immediateReaction" placeholder="e.g., dizziness, nausea" 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150">
+          </div>
+
+          <!-- Additional Notes -->
+            <div>
+            <label for="additionalNote" class="block text-sm font-medium text-gray-700 mb-2">
+              <i class="fas fa-sticky-note text-purple-600 mr-2"></i>
+              Additional Notes
+              </label>
+            <textarea id="additionalNote" name="additionalNote" rows="4" placeholder="Any additional observations or notes..." 
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition duration-150"></textarea>
+            <div class="mt-1 text-right">
+              <span class="text-xs text-gray-500">Character count: <span id="charCount">0</span></span>
+            </div>
+            </div>
+
+            <!-- Form Preview Section -->
+            <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">
+                <i class="fas fa-eye text-blue-600 mr-2"></i>
+                Preview
+              </h4>
+              <div id="formPreview" class="text-sm text-gray-600 space-y-2">
+                <p><strong>Donor NIC:</strong> <span class="text-gray-800">-</span></p>
+                <p><strong>Outcome:</strong> <span class="text-gray-800">-</span></p>
+                <p><strong>Deferral Reason:</strong> <span class="text-gray-800">-</span></p>
+                <p><strong>Recovery Advice:</strong> <span class="text-gray-800">-</span></p>
+              <p><strong>Immediate Reaction:</strong> <span class="text-gray-800">-</span></p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tables will be added here -->
+      <div id="contentSections"></div>
+    </div>
+</div>
+
+<script>
+    // Doctor Notes Form Functions
+    function showDoctorNotesForm() {
+      document.getElementById('doctorNotesFormSection').style.display = 'block';
+      document.getElementById('contentSections').innerHTML = '';
+      
+      // Add event listeners for real-time preview
+      addFormEventListeners();
+      
+      // Scroll to form
+      document.getElementById('doctorNotesFormSection').scrollIntoView({ 
+        behavior: 'smooth' 
+      });
+    }
+
+    function hideDoctorNotesForm() {
+      document.getElementById('doctorNotesFormSection').style.display = 'none';
+      // Clear form
+      document.getElementById('doctorNotesForm').reset();
+      document.getElementById('charCount').textContent = '0';
+      updateFormPreview();
+    }
+
+    function addFormEventListeners() {
+      // Character count for additional note
+      const additionalNote = document.getElementById('additionalNote');
+      const charCount = document.getElementById('charCount');
+      
+      additionalNote.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+      });
+
+      // No special event listeners needed for immediate reaction field
+
+      // Real-time preview updates
+      const formInputs = document.querySelectorAll('#doctorNotesForm input, #doctorNotesForm select, #doctorNotesForm textarea');
+      formInputs.forEach(input => {
+        input.addEventListener('input', updateFormPreview);
+        input.addEventListener('change', updateFormPreview);
+      });
+    }
+
+    function updateFormPreview() {
+      const donorNic = document.getElementById('donorNic').value || '-';
+      const outcome = document.getElementById('outcome').value || '-';
+      const reasonForDeferral = document.getElementById('reasonForDeferral').value || '-';
+      const recoveryAdvice = document.getElementById('recoveryAdvice').value || '-';
+      const immediateReaction = document.getElementById('immediateReaction').value || '-';
+
+      document.getElementById('formPreview').innerHTML = `
+        <p><strong>Donor NIC:</strong> <span class="text-gray-800">${donorNic}</span></p>
+        <p><strong>Outcome:</strong> <span class="text-gray-800">${outcome}</span></p>
+        <p><strong>Deferral Reason:</strong> <span class="text-gray-800">${reasonForDeferral}</span></p>
+        <p><strong>Recovery Advice:</strong> <span class="text-gray-800">${recoveryAdvice}</span></p>
+        <p><strong>Immediate Reaction:</strong> <span class="text-gray-800">${immediateReaction}</span></p>
+      `;
+    }
+
+    async function saveDoctorNote() {
+      // Get form data
+      const formData = {
+        donorNic: document.getElementById('donorNic').value,
+        outcome: document.getElementById('outcome').value,
+        reasonForDeferral: document.getElementById('reasonForDeferral').value,
+        recoveryAdvice: document.getElementById('recoveryAdvice').value,
+        immediateReaction: document.getElementById('immediateReaction').value || null,
+        additionalNotes: document.getElementById('additionalNote').value
+      };
+
+      // Validate required fields
+      if (!formData.donorNic.trim()) {
+        alert('Please enter the Donor NIC.');
+        document.getElementById('donorNic').focus();
+        return;
+      }
+
+      if (!formData.outcome) {
+        alert('Please select an outcome.');
+        document.getElementById('outcome').focus();
+        return;
+      }
+
+      // Show confirmation
+      const confirmMessage = `Confirm Doctor Note Entry:
+      
+Donor NIC: ${formData.donorNic}
+Outcome: ${formData.outcome}
+${formData.reasonForDeferral ? `Deferral Reason: ${formData.reasonForDeferral}` : ''}
+${formData.recoveryAdvice ? `Recovery Advice: ${formData.recoveryAdvice}` : ''}
+${formData.immediateReaction ? `Immediate Reaction: ${formData.immediateReaction}` : ''}
+${formData.additionalNotes ? `Additional Note: ${formData.additionalNotes}` : ''}
+
+Do you want to save this note?`;
+
+      if (confirm(confirmMessage)) {
+        try {
+          console.log('Saving doctor note:', formData);
+          
+          // Send data to backend
+          const response = await fetch('/api/doctor-notes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+          });
+
+          console.log('Response status:', response.status);
+          const result = await response.json();
+          console.log('Response result:', result);
+          
+          if (result.success) {
+        // Show success message
+        alert('✅ Doctor note saved successfully!');
+        
+        // Clear form and hide
+        hideDoctorNotesForm();
+        
+        // Show success notification
+        showSuccessNotification('Doctor note has been saved successfully!');
+          } else {
+            alert('❌ Error saving doctor note: ' + result.message);
+          }
+        } catch (error) {
+          console.error('Error saving doctor note:', error);
+          alert('❌ Error saving doctor note. Please try again.');
+        }
+      }
+    }
+
+    function showSuccessNotification(message) {
+      // Create a temporary success notification
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300';
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas fa-check-circle mr-2"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Helper functions for Doctor Notes
+    function getOutcomeBadgeClass(outcome) {
+      switch(outcome) {
+        case 'Successful': return 'bg-green-100 text-green-800';
+        case 'Deferred': return 'bg-yellow-100 text-yellow-800';
+        case 'Incomplete': return 'bg-blue-100 text-blue-800';
+        case 'Adverse Reaction': return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    }
+
+    function displayDoctorNotesTable(notes) {
+      const tableRows = notes.map(note => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${note.donorNic}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getOutcomeBadgeClass(note.outcome)}">${note.outcome}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${note.reasonForDeferral || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${note.immediateReaction || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${note.recoveryAdvice || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(note.createdAt)}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="viewNoteDetails(${note.noteId})" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+            <button onclick="deleteNote(${note.noteId})" class="text-red-600 hover:text-red-900">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-red-600">
+              <i class="fas fa-table mr-3"></i>
+              Doctor Notes Records
+            </h2>
+            <button onclick="hideDoctorNotesTable()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Search and Filter Controls -->
+          <div class="mb-6 flex flex-wrap gap-4">
+            <div class="flex-1 min-w-64">
+              <input type="text" id="searchNotes" placeholder="Search by Donor NIC, Outcome, or Notes..." 
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+            </div>
+            <select id="filterOutcome" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+              <option value="">All Outcomes</option>
+              <option value="Successful">Successful</option>
+              <option value="Deferred">Deferred</option>
+              <option value="Incomplete">Incomplete</option>
+              <option value="Adverse Reaction">Adverse Reaction</option>
+            </select>
+            <button onclick="showDoctorNotesTable()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+              <i class="fas fa-sync-alt mr-2"></i>
+              Refresh
+            </button>
+          </div>
+
+          <!-- Doctor Notes Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-id-card mr-2"></i>Donor NIC
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-check-circle mr-2"></i>Outcome
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Deferral Reason
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Immediate Reaction
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-heart mr-2"></i>Recovery Advice
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-calendar mr-2"></i>Created Date
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                    <i class="fas fa-cogs mr-2"></i>Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="doctorNotesTableBody" class="bg-white divide-y divide-gray-200">
+                ${tableRows}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="mt-6 flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+              Showing <span class="font-medium">1</span> to <span class="font-medium">${notes.length}</span> of <span class="font-medium">${notes.length}</span> results
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Previous</button>
+              <button class="px-3 py-1 text-sm bg-red-600 text-white rounded">1</button>
+              <button class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Next</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Doctor Notes Table Functions
+    async function showDoctorNotesTable() {
+      console.log('Loading Doctor Notes Table...');
+      
+      // Show loading state
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-red-600">
+              <i class="fas fa-table mr-3"></i>
+              Doctor Notes Records
+            </h2>
+            <button onclick="hideDoctorNotesTable()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+              </button>
+          </div>
+          
+          <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-red-600 text-4xl mb-4"></i>
+            <p class="text-gray-600">Loading doctor notes...</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        // Fetch doctor notes from backend
+        const response = await fetch('/api/doctor-notes');
+        const result = await response.json();
+        
+        if (result.success) {
+          displayDoctorNotesTable(result.notes);
+        } else {
+          throw new Error(result.message || 'Failed to load doctor notes');
+        }
+      } catch (error) {
+        console.error('Error loading doctor notes:', error);
+        document.getElementById('contentSections').innerHTML = `
+          <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-3xl font-bold text-red-600">
+                <i class="fas fa-table mr-3"></i>
+                Doctor Notes Records
+              </h2>
+              <button onclick="hideDoctorNotesTable()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                <i class="fas fa-times text-2xl"></i>
+              </button>
+            </div>
+            
+            <div class="text-center py-8">
+              <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+              <p class="text-red-600">Error loading doctor notes: ${error.message}</p>
+              <button onclick="showDoctorNotesTable()" class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-retry mr-2"></i>
+                Retry
+              </button>
+          </div>
+        </div>
+      `;
+      }
+    }
+
+    function hideDoctorNotesTable() {
+      document.getElementById('contentSections').innerHTML = '';
+    }
+
+    // Health Assessments Functions
+    async function loadHealthAssessments() {
+      console.log('Loading Health Assessments...');
+      
+      // Show loading state
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-green-600">
+              <i class="fas fa-clipboard-check mr-3"></i>
+              Health Assessments
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+          
+          <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-green-600 text-4xl mb-4"></i>
+            <p class="text-gray-600">Loading health assessments...</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        // Fetch health assessments from backend
+        const response = await fetch('/doctor/health-assessments');
+        const assessments = await response.json();
+        
+        displayHealthAssessments(assessments);
+      } catch (error) {
+        console.error('Error loading health assessments:', error);
+        document.getElementById('contentSections').innerHTML = `
+          <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-3xl font-bold text-green-600">
+                <i class="fas fa-clipboard-check mr-3"></i>
+                Health Assessments
+              </h2>
+              <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                <i class="fas fa-times text-2xl"></i>
+              </button>
+            </div>
+            
+            <div class="text-center py-8">
+              <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+              <p class="text-red-600">Error loading health assessments: ${error.message}</p>
+              <button onclick="loadHealthAssessments()" class="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-retry mr-2"></i>
+                Retry
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function loadPendingAssessments() {
+      console.log('Loading Pending Assessments...');
+      
+      // Show loading state
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-yellow-600">
+              <i class="fas fa-clock mr-3"></i>
+              Pending Reviews
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+          
+          <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-yellow-600 text-4xl mb-4"></i>
+            <p class="text-gray-600">Loading pending assessments...</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        // Fetch pending assessments from backend
+        const response = await fetch('/doctor/health-assessments/pending');
+        const assessments = await response.json();
+        
+        displayPendingAssessments(assessments);
+      } catch (error) {
+        console.error('Error loading pending assessments:', error);
+        document.getElementById('contentSections').innerHTML = `
+          <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-3xl font-bold text-yellow-600">
+                <i class="fas fa-clock mr-3"></i>
+                Pending Reviews
+              </h2>
+              <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                <i class="fas fa-times text-2xl"></i>
+              </button>
+            </div>
+            
+            <div class="text-center py-8">
+              <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+              <p class="text-red-600">Error loading pending assessments: ${error.message}</p>
+              <button onclick="loadPendingAssessments()" class="mt-4 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-retry mr-2"></i>
+                Retry
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Donor Management Functions
+    async function loadAllDonors() {
+      console.log('Loading All Donors...');
+      
+      // Show loading state
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-blue-600">
+              <i class="fas fa-users mr-3"></i>
+              All Donors
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-blue-600 text-4xl mb-4"></i>
+            <p class="text-gray-600">Loading donors...</p>
+                  </div>
+                  </div>
+      `;
+
+      try {
+        // Fetch donors from backend
+        const response = await fetch('/admin/donors');
+        const donors = await response.json();
+        
+        displayDonors(donors);
+      } catch (error) {
+        console.error('Error loading donors:', error);
+        document.getElementById('contentSections').innerHTML = `
+          <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-3xl font-bold text-blue-600">
+                <i class="fas fa-users mr-3"></i>
+                All Donors
+              </h2>
+              <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+                <i class="fas fa-times text-2xl"></i>
+              </button>
+                  </div>
+            
+            <div class="text-center py-8">
+              <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+              <p class="text-red-600">Error loading donors: ${error.message}</p>
+              <button onclick="loadAllDonors()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-retry mr-2"></i>
+                Retry
+              </button>
+                  </div>
+                </div>
+        `;
+      }
+    }
+
+    function showDonorSearch() {
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-indigo-600">
+              <i class="fas fa-search mr-3"></i>
+              Search Donor
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+              </div>
+
+          <!-- Search Form -->
+          <div class="mb-6">
+            <div class="flex gap-4">
+              <div class="flex-1">
+                <input type="text" id="donorSearchInput" placeholder="Enter Donor NIC to search..." 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                  </div>
+              <button onclick="searchDonor()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg">
+                <i class="fas fa-search mr-2"></i>
+                Search
+              </button>
+                  </div>
+                  </div>
+
+          <!-- Search Results -->
+          <div id="donorSearchResults" class="mt-6">
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-search text-4xl mb-4"></i>
+              <p>Enter a Donor NIC above to search for donor information</p>
+                </div>
+              </div>
+        </div>
+      `;
+    }
+
+    // Display Functions
+    function displayHealthAssessments(assessments) {
+      const tableRows = assessments.map(assessment => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${assessment.donorNic}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.weight || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.height || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.bloodPressure || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.hemoglobin || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(assessment.status)}">${assessment.status || 'Pending'}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(assessment.createdAt)}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="viewAssessment(${assessment.healthAssessmentId})" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+            <button onclick="approveAssessment(${assessment.healthAssessmentId})" class="text-green-600 hover:text-green-900 mr-3">Approve</button>
+            <button onclick="rejectAssessment(${assessment.healthAssessmentId})" class="text-red-600 hover:text-red-900 mr-3">Reject</button>
+            <button onclick="deleteAssessment(${assessment.healthAssessmentId})" class="text-gray-600 hover:text-gray-900">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-green-600">
+              <i class="fas fa-clipboard-check mr-3"></i>
+              Health Assessments
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+                  </div>
+
+          <!-- Health Assessments Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Donor NIC</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Weight</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Height</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Blood Pressure</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Hemoglobin</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Created Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${tableRows}
+              </tbody>
+            </table>
+                  </div>
+                  </div>
+      `;
+    }
+
+    function displayPendingAssessments(assessments) {
+      const tableRows = assessments.map(assessment => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${assessment.donorNic}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.weight || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.height || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.bloodPressure || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${assessment.hemoglobin || '-'}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formatDate(assessment.createdAt)}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="viewAssessment(${assessment.healthAssessmentId})" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+            <button onclick="approveAssessment(${assessment.healthAssessmentId})" class="text-green-600 hover:text-green-900 mr-3">Approve</button>
+            <button onclick="rejectAssessment(${assessment.healthAssessmentId})" class="text-red-600 hover:text-red-900 mr-3">Reject</button>
+            <button onclick="deleteAssessment(${assessment.healthAssessmentId})" class="text-gray-600 hover:text-gray-900">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-yellow-600">
+              <i class="fas fa-clock mr-3"></i>
+              Pending Reviews
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+                  </div>
+
+          <!-- Pending Assessments Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Donor NIC</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Weight</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Height</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Blood Pressure</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Hemoglobin</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Created Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${tableRows}
+              </tbody>
+            </table>
+                </div>
+              </div>
+      `;
+    }
+
+    function displayDonors(donors) {
+      const tableRows = donors.map(donor => `
+        <tr class="hover:bg-gray-50">
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${donor.nic}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.fullName}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.age}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.gender}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.bloodType}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.contactNumber}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${donor.email}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="viewDonorDetails('${donor.nic}')" class="text-blue-600 hover:text-blue-900 mr-3">View</button>
+            <button onclick="editDonor('${donor.nic}')" class="text-green-600 hover:text-green-900 mr-3">Edit</button>
+            <button onclick="deleteDonor('${donor.nic}')" class="text-red-600 hover:text-red-900">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-blue-600">
+              <i class="fas fa-users mr-3"></i>
+              All Donors
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+            </div>
+
+          <!-- Donors Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">NIC</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Full Name</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Age</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Gender</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Blood Type</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Contact</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Email</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${tableRows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Helper Functions
+    function getStatusBadgeClass(status) {
+      switch(status) {
+        case 'APPROVED': return 'bg-green-100 text-green-800';
+        case 'REJECTED': return 'bg-red-100 text-red-800';
+        case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    function hideContent() {
+      document.getElementById('contentSections').innerHTML = '';
+    }
+
+    function displayAssessmentDetails(assessment) {
+      if (!assessment) {
+        alert('❌ No assessment data received');
+        return;
+      }
+      
+      console.log('Displaying assessment:', assessment);
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-blue-600">
+              <i class="fas fa-eye mr-3"></i>
+              Health Assessment Details
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Assessment Information Card -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              <!-- Basic Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-user mr-2 text-blue-600"></i>Basic Information
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Assessment ID:</span>
+                    <span class="font-medium">${assessment.healthAssessmentId}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Donor NIC:</span>
+                    <span class="font-medium">${assessment.donorNic}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Assessment Date:</span>
+                    <span class="font-medium">${formatDate(assessment.assessmentDate)}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(assessment.status)}">${assessment.status || 'Pending'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Physical Measurements -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-weight mr-2 text-green-600"></i>Physical Measurements
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Weight:</span>
+                    <span class="font-medium">${assessment.weight || '-'} kg</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Height:</span>
+                    <span class="font-medium">${assessment.height || '-'} cm</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">BMI:</span>
+                    <span class="font-medium">${calculateBMI(assessment.weight, assessment.height)}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Temperature:</span>
+                    <span class="font-medium">${assessment.temperature || '-'}°C</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vital Signs -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-heartbeat mr-2 text-red-600"></i>Vital Signs
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Blood Pressure:</span>
+                    <span class="font-medium">${assessment.bloodPressure || '-'}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Heart Rate:</span>
+                    <span class="font-medium">${assessment.heartRate || '-'} bpm</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Hemoglobin:</span>
+                    <span class="font-medium">${assessment.hemoglobin || '-'} g/dL</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Pulse:</span>
+                    <span class="font-medium">${assessment.pulse || '-'} bpm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Information -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            
+            <!-- Medical Conditions -->
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Medical Conditions
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <span class="text-gray-600">Current Illness:</span>
+                  <p class="mt-1 text-gray-800">${assessment.currentIllness || 'None reported'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Chronic Conditions:</span>
+                  <p class="mt-1 text-gray-800">${assessment.chronicConditions || 'None reported'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Recent Surgery:</span>
+                  <p class="mt-1 text-gray-800">${assessment.recentSurgery || 'None reported'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Pregnancy Status:</span>
+                  <p class="mt-1 text-gray-800">${assessment.pregnancyStatus || 'Not applicable'}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medication & History -->
+            <div class="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-pills mr-2 text-orange-600"></i>Medication & History
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <span class="text-gray-600">Current Medication:</span>
+                  <p class="mt-1 text-gray-800">${assessment.currentMedication || 'None reported'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Allergies:</span>
+                  <p class="mt-1 text-gray-800">${assessment.allergies || 'None reported'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Donation History:</span>
+                  <p class="mt-1 text-gray-800">${assessment.donationHistory || 'No previous donations'}</p>
+                </div>
+                <div>
+                  <span class="text-gray-600">Last Donation:</span>
+                  <p class="mt-1 text-gray-800">${formatDate(assessment.lastDonationDate) || 'Never'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assessment Notes -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-notes-medical mr-2 text-teal-600"></i>Assessment Notes
+            </h3>
+            <div class="space-y-3">
+              <div>
+                <span class="text-gray-600">Doctor's Notes:</span>
+                <p class="mt-1 text-gray-800">${assessment.doctorNotes || 'No notes available'}</p>
+              </div>
+              <div>
+                <span class="text-gray-600">Recommendations:</span>
+                <p class="mt-1 text-gray-800">${assessment.recommendations || 'No recommendations'}</p>
+              </div>
+              <div>
+                <span class="text-gray-600">Follow-up Required:</span>
+                <p class="mt-1 text-gray-800">${assessment.followUpRequired ? 'Yes' : 'No'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-center space-x-4">
+            <button onclick="approveAssessment(${assessment.healthAssessmentId})" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-check mr-2"></i>Approve Assessment
+            </button>
+            <button onclick="rejectAssessment(${assessment.healthAssessmentId})" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-times mr-2"></i>Reject Assessment
+            </button>
+            <button onclick="deleteAssessment(${assessment.healthAssessmentId})" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-trash mr-2"></i>Delete Assessment
+            </button>
+            <button onclick="hideContent()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function calculateBMI(weight, height) {
+      if (!weight || !height) return '-';
+      const heightInMeters = height / 100;
+      const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+      return `${bmi} kg/m²`;
+    }
+
+    async function searchDonor() {
+      const nic = document.getElementById('donorSearchInput').value.trim();
+      if (!nic) {
+        alert('Please enter a Donor NIC to search.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/admin/donors/${nic}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          displayDonorSearchResult(result.donor);
+        } else {
+          document.getElementById('donorSearchResults').innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+              <p>Donor not found with NIC: ${nic}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error searching donor:', error);
+        document.getElementById('donorSearchResults').innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+            <p>Error searching donor: ${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function displayDonorSearchResult(donor) {
+      document.getElementById('donorSearchResults').innerHTML = `
+        <div class="bg-white border border-gray-200 rounded-lg p-6">
+          <h3 class="text-xl font-semibold text-gray-900 mb-4">Donor Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><strong>NIC:</strong> ${donor.nic}</div>
+            <div><strong>Full Name:</strong> ${donor.fullName}</div>
+            <div><strong>Age:</strong> ${donor.age}</div>
+            <div><strong>Gender:</strong> ${donor.gender}</div>
+            <div><strong>Blood Type:</strong> ${donor.bloodType}</div>
+            <div><strong>Contact:</strong> ${donor.contactNumber}</div>
+            <div><strong>Email:</strong> ${donor.email}</div>
+            <div><strong>Address:</strong> ${donor.address}</div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button onclick="viewDonorDetails('${donor.nic}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+              <i class="fas fa-eye mr-2"></i>View Details
+            </button>
+            <button onclick="editDonor('${donor.nic}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+              <i class="fas fa-edit mr-2"></i>Edit
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Placeholder functions for actions
+    async function viewAssessment(assessmentId) {
+      try {
+        // Fetch detailed assessment data from backend
+        const response = await fetch(`/doctor/health-assessments/${assessmentId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Assessment data received:', result.data);
+          displayAssessmentDetails(result.data);
+        } else {
+          alert(`❌ Error loading assessment: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error loading assessment:', error);
+        alert(`❌ Error loading assessment: ${error.message}`);
+      }
+    }
+
+    function approveAssessment(assessmentId) {
+      if (confirm(`Are you sure you want to approve assessment ID: ${assessmentId}?`)) {
+        alert(`Approved assessment ID: ${assessmentId}`);
+      }
+    }
+
+    function rejectAssessment(assessmentId) {
+      if (confirm(`Are you sure you want to reject assessment ID: ${assessmentId}?`)) {
+        alert(`Rejected assessment ID: ${assessmentId}`);
+      }
+    }
+
+    function deleteAssessment(assessmentId) {
+      if (confirm(`Are you sure you want to DELETE assessment ID: ${assessmentId}?\n\nThis action cannot be undone!`)) {
+        // Call backend API to delete assessment
+        fetch(`/doctor/health-assessments/${assessmentId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(result => {
+          if (result.success) {
+            alert(`✅ Assessment ID: ${assessmentId} has been deleted successfully!`);
+            // Refresh the current view
+            if (document.getElementById('contentSections').innerHTML.includes('Health Assessments')) {
+              loadHealthAssessments();
+            } else if (document.getElementById('contentSections').innerHTML.includes('Pending Reviews')) {
+              loadPendingAssessments();
+            }
+          } else {
+            alert(`❌ Error deleting assessment: ${result.message}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting assessment:', error);
+          alert(`❌ Error deleting assessment: ${error.message}`);
+        });
+      }
+    }
+
+    async function viewDonorDetails(nic) {
+      try {
+        // Fetch detailed donor data from backend
+        const response = await fetch(`/admin/donors/${nic}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          displayDonorDetails(result.donor);
+        } else {
+          alert(`❌ Error loading donor: ${result.message || 'Donor not found'}`);
+        }
+      } catch (error) {
+        console.error('Error loading donor:', error);
+        alert(`❌ Error loading donor: ${error.message}`);
+      }
+    }
+
+    function displayDonorDetails(donor) {
+      if (!donor) {
+        alert('❌ No donor data received');
+        return;
+      }
+      
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-blue-600">
+              <i class="fas fa-user mr-3"></i>
+              Donor Details
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Donor Information Card -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- Personal Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-id-card mr-2 text-blue-600"></i>Personal Information
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">NIC:</span>
+                    <span class="font-medium">${donor.nic}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Full Name:</span>
+                    <span class="font-medium">${donor.fullName}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Date of Birth:</span>
+                    <span class="font-medium">${formatDate(donor.dateOfBirth)}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Age:</span>
+                    <span class="font-medium">${donor.age} years</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Gender:</span>
+                    <span class="font-medium">${donor.gender}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Medical Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-heartbeat mr-2 text-red-600"></i>Medical Information
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Blood Type:</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getBloodTypeBadgeClass(donor.bloodType)}">${donor.bloodType}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Health Status:</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getHealthStatusBadgeClass(donor.healthStatus)}">${donor.healthStatus}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-address-book mr-2 text-green-600"></i>Contact Information
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-3">
+                <div class="flex items-center">
+                  <i class="fas fa-phone text-gray-400 mr-3 w-5"></i>
+                  <div>
+                    <div class="text-sm text-gray-600">Phone Number</div>
+                    <div class="font-medium">${donor.contactNumber || 'Not provided'}</div>
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <i class="fas fa-envelope text-gray-400 mr-3 w-5"></i>
+                  <div>
+                    <div class="text-sm text-gray-600">Email Address</div>
+                    <div class="font-medium">${donor.email || 'Not provided'}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-start">
+                  <i class="fas fa-map-marker-alt text-gray-400 mr-3 w-5 mt-1"></i>
+                  <div>
+                    <div class="text-sm text-gray-600">Address</div>
+                    <div class="font-medium">${donor.address || 'Not provided'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-center space-x-4">
+            <button onclick="editDonor('${donor.nic}')" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-edit mr-2"></i>Edit Donor
+            </button>
+            <button onclick="deleteDonor('${donor.nic}')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-trash mr-2"></i>Delete Donor
+            </button>
+            <button onclick="hideContent()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getBloodTypeBadgeClass(bloodType) {
+      const typeColors = {
+        'A+': 'bg-red-100 text-red-800',
+        'A-': 'bg-red-100 text-red-800',
+        'B+': 'bg-blue-100 text-blue-800',
+        'B-': 'bg-blue-100 text-blue-800',
+        'AB+': 'bg-green-100 text-green-800',
+        'AB-': 'bg-green-100 text-green-800',
+        'O+': 'bg-purple-100 text-purple-800',
+        'O-': 'bg-purple-100 text-purple-800'
+      };
+      return typeColors[bloodType] || 'bg-gray-100 text-gray-800';
+    }
+
+    function getHealthStatusBadgeClass(status) {
+      const statusColors = {
+        'Healthy': 'bg-green-100 text-green-800',
+        'Under Review': 'bg-yellow-100 text-yellow-800',
+        'Deferred': 'bg-red-100 text-red-800',
+        'Pending': 'bg-blue-100 text-blue-800'
+      };
+      return statusColors[status] || 'bg-gray-100 text-gray-800';
+    }
+
+    function editDonor(nic) {
+      alert(`Edit donor with NIC: ${nic}`);
+    }
+
+    function deleteDonor(nic) {
+      if (confirm(`Are you sure you want to delete donor with NIC: ${nic}?`)) {
+        alert(`Delete donor with NIC: ${nic}`);
+      }
+    }
+
+    // Placeholder functions for note actions
+    async function viewNoteDetails(noteId) {
+      try {
+        // Fetch detailed note data from backend
+        const response = await fetch(`/api/doctor-notes/${noteId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          displayNoteDetails(result.note);
+        } else {
+          alert(`❌ Error loading note: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error loading note:', error);
+        alert(`❌ Error loading note: ${error.message}`);
+      }
+    }
+
+    function displayNoteDetails(note) {
+      if (!note) {
+        alert('❌ No note data received');
+        return;
+      }
+      
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-red-600">
+              <i class="fas fa-file-medical-alt mr-3"></i>
+              Doctor Note Details
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Note Information Card -->
+          <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <!-- Basic Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-info-circle mr-2 text-red-600"></i>Basic Information
+                </h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Note ID:</span>
+                    <span class="font-medium">${note.noteId}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Donor NIC:</span>
+                    <span class="font-medium">${note.donorNic}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Outcome:</span>
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getOutcomeBadgeClass(note.outcome)}">${note.outcome}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Created Date:</span>
+                    <span class="font-medium">${formatDate(note.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Medical Information -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                  <i class="fas fa-stethoscope mr-2 text-blue-600"></i>Medical Information
+                </h3>
+                <div class="space-y-2">
+                  <div>
+                    <span class="text-gray-600">Deferral Reason:</span>
+                    <p class="mt-1 text-gray-800">${note.reasonForDeferral || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span class="text-gray-600">Immediate Reaction:</span>
+                    <p class="mt-1 text-gray-800">${note.immediateReaction || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span class="text-gray-600">Recovery Advice:</span>
+                    <p class="mt-1 text-gray-800">${note.recoveryAdvice || 'None provided'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Notes -->
+          <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-sticky-note mr-2 text-purple-600"></i>Additional Notes
+            </h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <p class="text-gray-800">${note.additionalNotes || 'No additional notes provided'}</p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-center space-x-4">
+            <button onclick="deleteNote(${note.noteId})" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-trash mr-2"></i>Delete Note
+            </button>
+            <button onclick="hideContent()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
+              <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Edit functionality removed - only View and Delete are available
+
+    function deleteNote(noteId) {
+      if (confirm(`Are you sure you want to delete note ID: ${noteId}?`)) {
+        alert(`Delete note with ID: ${noteId}`);
+      }
+    }
+
+    // Blood Inventory Functions (HTML only - no backend)
+    function showBloodInventory() {
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-purple-600">
+              <i class="fas fa-tint mr-3"></i>
+              Blood Inventory Overview
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="bloodInventoryLoading" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-purple-600 text-4xl mb-4"></i>
+            <p class="text-gray-600">Loading blood inventory...</p>
+          </div>
+
+          <!-- Blood Type Inventory Cards -->
+          <div id="bloodInventoryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" style="display: none;">
+            
+            <!-- Cards will be populated dynamically -->
+
+
+          </div>
+
+          <!-- Summary Information -->
+          <div id="bloodInventorySummary" class="bg-gray-50 rounded-lg p-6" style="display: none;">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">
+              <i class="fas fa-info-circle mr-2"></i>
+              Inventory Summary
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="text-center">
+                <div id="totalAvailable" class="text-3xl font-bold text-green-600">0</div>
+                <div class="text-sm text-gray-600">Total Available Units</div>
+              </div>
+              <div class="text-center">
+                <div id="totalExpiring" class="text-3xl font-bold text-orange-600">0</div>
+                <div class="text-sm text-gray-600">Expiring Soon</div>
+              </div>
+              <div class="text-center">
+                <div id="totalExpired" class="text-3xl font-bold text-red-600">0</div>
+                <div class="text-sm text-gray-600">Expired Units</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Load real blood inventory data
+      loadBloodInventoryForDoctor();
+    }
+
+    // Load blood inventory data for doctor dashboard
+    async function loadBloodInventoryForDoctor() {
+      try {
+        const response = await fetch('/hospital/blood-inventory/summary');
+        const result = await response.json();
+        
+        if (result.success) {
+          displayBloodInventoryForDoctor(result);
+        } else {
+          showBloodInventoryError(result.message);
+        }
+      } catch (error) {
+        console.error('Error loading blood inventory:', error);
+        showBloodInventoryError('Error loading blood inventory. Please try again.');
+      }
+    }
+
+    // Display blood inventory data for doctor
+    function displayBloodInventoryForDoctor(data) {
+      const availableBlood = data.availableBlood || {};
+      const expiringSoon = data.expiringSoon || [];
+      const expired = data.expired || [];
+      
+      // Hide loading, show cards
+      document.getElementById('bloodInventoryLoading').style.display = 'none';
+      document.getElementById('bloodInventoryCards').style.display = 'grid';
+      document.getElementById('bloodInventorySummary').style.display = 'block';
+      
+      // Define all blood types
+      const bloodTypes = [
+        { type: 'A+', color: 'red', name: 'A Positive' },
+        { type: 'A-', color: 'red', name: 'A Negative' },
+        { type: 'B+', color: 'blue', name: 'B Positive' },
+        { type: 'B-', color: 'blue', name: 'B Negative' },
+        { type: 'AB+', color: 'purple', name: 'AB Positive' },
+        { type: 'AB-', color: 'purple', name: 'AB Negative' },
+        { type: 'O+', color: 'green', name: 'O Positive' },
+        { type: 'O-', color: 'green', name: 'O Negative' }
+      ];
+      
+      let cardsHTML = '';
+      let totalAvailable = 0;
+      
+      bloodTypes.forEach(bloodType => {
+        const available = availableBlood[bloodType.type] || 0;
+        const expiring = expiringSoon.filter(item => item.bloodType === bloodType.type).length;
+        const expiredCount = expired.filter(item => item.bloodType === bloodType.type).length;
+        
+        totalAvailable += available;
+        
+        // Determine card styling based on stock level
+        let cardClass = `bg-gradient-to-br from-${bloodType.color}-50 to-${bloodType.color}-100 border-2 border-${bloodType.color}-300`;
+        let iconClass = `bg-${bloodType.color}-600`;
+        let textClass = `text-${bloodType.color}-800`;
+        
+        if (available === 0) {
+          cardClass = 'bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300';
+          iconClass = 'bg-red-600';
+          textClass = 'text-red-800';
+        } else if (available < 5) {
+          cardClass = 'bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300';
+          iconClass = 'bg-yellow-600';
+          textClass = 'text-yellow-800';
+        }
+        
+        cardsHTML += `
+          <div class="${cardClass} rounded-xl p-6 hover:shadow-lg transition duration-300">
+            <div class="text-center">
+              <div class="inline-flex items-center justify-center w-12 h-12 ${iconClass} rounded-full mb-3">
+                <span class="text-white font-bold text-lg">${bloodType.type}</span>
+              </div>
+              <h3 class="text-lg font-semibold ${textClass} mb-2">${bloodType.name}</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Available:</span>
+                  <span class="font-semibold ${available === 0 ? 'text-red-600' : available < 5 ? 'text-yellow-600' : 'text-green-600'}">${available} units</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Expiring Soon:</span>
+                  <span class="font-semibold text-orange-600">${expiring} units</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Expired:</span>
+                  <span class="font-semibold text-red-600">${expiredCount} units</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('bloodInventoryCards').innerHTML = cardsHTML;
+      
+      // Update summary
+      document.getElementById('totalAvailable').textContent = totalAvailable;
+      document.getElementById('totalExpiring').textContent = expiringSoon.length;
+      document.getElementById('totalExpired').textContent = expired.length;
+    }
+
+    // Show error message for blood inventory
+    function showBloodInventoryError(message) {
+      document.getElementById('bloodInventoryLoading').innerHTML = `
+        <div class="text-center py-8">
+          <i class="fas fa-exclamation-triangle text-red-600 text-4xl mb-4"></i>
+          <p class="text-red-600">${message}</p>
+          <button onclick="loadBloodInventoryForDoctor()" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+            <i class="fas fa-redo mr-2"></i>
+            Retry
+          </button>
+        </div>
+      `;
+    }
+
+    function showBloodStockLevels() {
+      document.getElementById('contentSections').innerHTML = `
+        <div class="mt-8 bg-white rounded-xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-pink-600">
+              <i class="fas fa-exclamation-triangle mr-3"></i>
+              Blood Stock Alerts
+            </h2>
+            <button onclick="hideContent()" class="text-gray-400 hover:text-gray-600 transition duration-150">
+              <i class="fas fa-times text-2xl"></i>
+            </button>
+          </div>
+
+          <!-- Critical Stock Alerts -->
+          <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-red-400"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Critical Stock Levels</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>AB- Blood Type: Only 4 units remaining (Critical)</li>
+                    <li>B- Blood Type: Only 6 units remaining (Low)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expiring Soon Alerts -->
+          <div class="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6 rounded">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-clock text-orange-400"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-orange-800">Expiring Soon (Next 7 Days)</h3>
+                <div class="mt-2 text-sm text-orange-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>O+ Blood Type: 5 units expiring</li>
+                    <li>A+ Blood Type: 3 units expiring</li>
+                    <li>B+ Blood Type: 4 units expiring</li>
+                    <li>AB+ Blood Type: 2 units expiring</li>
+                    <li>O- Blood Type: 3 units expiring</li>
+                    <li>A- Blood Type: 2 units expiring</li>
+                    <li>B- Blood Type: 1 unit expiring</li>
+                    <li>AB- Blood Type: 1 unit expiring</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommended Actions -->
+          <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-lightbulb text-blue-400"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Recommended Actions</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Schedule additional blood drives for AB- and B- blood types</li>
+                    <li>Contact donors with AB- blood type for immediate donation</li>
+                    <li>Prioritize distribution of expiring blood units</li>
+                    <li>Review and update blood ordering schedule</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stock Level Legend -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Stock Level Legend</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                <span class="text-sm text-gray-700">Good Stock (>20 units)</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                <span class="text-sm text-gray-700">Low Stock (10-20 units)</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                <span class="text-sm text-gray-700">Critical Stock (<10 units)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Note -->
+          <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-400"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                  <strong>Note:</strong> This is a demo view. In a real system, these alerts would be automatically generated based on your actual blood inventory data.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    console.log('Doctor Dashboard loaded');
+</script>
+</body>
+</html>

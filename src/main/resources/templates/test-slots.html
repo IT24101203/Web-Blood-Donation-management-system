@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Slots Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4">Appointment Slots Database Test Results</h1>
+        
+        <div th:if="${testStatus == 'SUCCESS'}" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Success!</p>
+            <p>Database connection test completed successfully.</p>
+        </div>
+        <div th:if="${testStatus == 'FAILED'}" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Failed!</p>
+            <p th:text="${testStatus}"></p>
+        </div>
+
+        <div class="mb-4">
+            <p class="text-gray-700"><strong>Count Query Result:</strong> <span th:text="${countResult}">N/A</span></p>
+            <p class="text-gray-700"><strong>Find All Result:</strong> <span th:text="${slotsResult}">N/A</span></p>
+        </div>
+
+        <div th:if="${firstSlot != null}" class="mb-4">
+            <h2 class="text-xl font-bold mb-2">First Slot Details:</h2>
+            <div class="bg-gray-50 p-4 rounded">
+                <p><strong>Slot ID:</strong> <span th:text="${firstSlot.slotId}">N/A</span></p>
+                <p><strong>Date:</strong> <span th:text="${firstSlot.slotDate}">N/A</span></p>
+                <p><strong>Time:</strong> <span th:text="${firstSlot.slotTime}">N/A</span></p>
+                <p><strong>Location:</strong> <span th:text="${firstSlot.location}">N/A</span></p>
+                <p><strong>Max Donors:</strong> <span th:text="${firstSlot.maxDonors}">N/A</span></p>
+                <p><strong>Available Donors:</strong> <span th:text="${firstSlot.availableDonors}">N/A</span></p>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-bold mb-2">Console Output Details:</h2>
+        <p class="text-gray-600">Please check the console/terminal where your application is running for detailed debug messages.</p>
+        
+        <div class="mt-6 space-x-4">
+            <a href="/book-appointment" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Go to Book Appointment Page
+            </a>
+            <a href="/dashboard" class="inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Go to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

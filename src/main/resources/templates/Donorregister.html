@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Donation System - Donor Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .blood-drop {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            clip-path: circle(50% at 50% 40%);
+            animation: pulse 2s infinite;
+        }
+        .form-shadow {
+            box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.1), 0 10px 10px -5px rgba(220, 38, 38, 0.04);
+        }
+        .input-focus:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        /* Creative Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.05); }
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-drop {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1) 0%, rgba(185, 28, 28, 0.1) 100%);
+            clip-path: circle(50% at 50% 40%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-drop:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-drop:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+        .floating-drop:nth-child(3) { top: 50%; left: 5%; animation-delay: 2s; }
+        .floating-drop:nth-child(4) { top: 70%; right: 15%; animation-delay: 3s; }
+        .floating-drop:nth-child(5) { top: 30%; left: 80%; animation-delay: 4s; }
+        .floating-drop:nth-child(6) { top: 80%; left: 20%; animation-delay: 5s; }
+
+        .form-container {
+            animation: slideIn 0.8s ease-out;
+        }
+
+        .heartbeat-icon {
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        .ripple-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(220, 38, 38, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .ripple-effect:hover:before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .medical-cross {
+            position: relative;
+            display: inline-block;
+        }
+
+        .medical-cross:before, .medical-cross:after {
+            content: '';
+            position: absolute;
+            background: #dc2626;
+        }
+
+        .medical-cross:before {
+            width: 2px;
+            height: 20px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .medical-cross:after {
+            width: 20px;
+            height: 2px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        .blood-cell {
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #dc2626, #b91c1c);
+            border-radius: 50%;
+            position: absolute;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .form-field-animation {
+            transition: all 0.3s ease;
+        }
+
+        .form-field-animation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 via-white to-red-50 min-h-screen">
+<!-- Floating Background Elements -->
+<div class="floating-elements">
+    <div class="floating-drop"></div>
+    <div class="floating-drop"></div>
+    <div class="floating-drop"></div>
+    <div class="floating-drop"></div>
+    <div class="floating-drop"></div>
+    <div class="floating-drop"></div>
+
+    <!-- Floating Blood Cells -->
+    <div class="blood-cell" style="top: 15%; left: 25%; animation-delay: 1s;"></div>
+    <div class="blood-cell" style="top: 40%; right: 20%; animation-delay: 2s;"></div>
+    <div class="blood-cell" style="top: 65%; left: 70%; animation-delay: 3s;"></div>
+    <div class="blood-cell" style="top: 85%; left: 40%; animation-delay: 4s;"></div>
+</div>
+<!-- Header -->
+<header class="bg-white shadow-lg border-b-4 border-red-600">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-center">
+            <div class="blood-drop w-12 h-12 mr-4 heartbeat-icon"></div>
+            <h1 class="text-3xl font-bold gradient-text">Blood Donation System</h1>
+            <div class="medical-cross w-5 h-5 ml-4"></div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Page Title -->
+        <div class="text-center mb-8 form-container">
+            <h2 class="text-4xl font-bold gradient-text mb-4">Donor Registration</h2>
+            <p class="text-lg text-gray-600">Join our life-saving community. Your donation can save up to 3 lives!</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-red-500 to-red-700 mx-auto mt-4 rounded-full"></div>
+
+            <!-- Animated Hearts -->
+            <div class="flex justify-center space-x-4 mt-6">
+                <div class="heartbeat-icon">
+                    <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="heartbeat-icon" style="animation-delay: 0.5s;">
+                    <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="heartbeat-icon" style="animation-delay: 1s;">
+                    <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <div class="bg-white rounded-2xl form-shadow p-8 border border-red-100 form-container relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-100 to-transparent rounded-full -mr-16 -mt-16 opacity-50"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-red-100 to-transparent rounded-full -ml-12 -mb-12 opacity-50"></div>
+
+            <form action="/donor/register" method="POST" id="donorRegistrationForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- NIC (Primary Key) -->
+                    <div>
+                        <label for="nic" class="block text-sm font-semibold text-gray-700 mb-2">
+                            NIC (National Identity Card) <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="text"
+                                id="nic"
+                                name="nic"
+                                required
+                                placeholder="Enter your NIC number"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                                pattern="[0-9]{9}[vVxX]|[0-9]{12}"
+                                title="Enter valid NIC format (e.g., 123456789V or 123456789012)"
+                        >
+                        <small class="text-gray-500">This will be your unique donor ID</small>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div>
+                        <label for="fullName" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Full Name <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                required
+                                placeholder="Enter your full name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div>
+                        <label for="dateOfBirth" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Date of Birth <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="date"
+                                id="dateOfBirth"
+                                name="dateOfBirth"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                        <small class="text-gray-500">Must be between 18-65 years old</small>
+                    </div>
+
+                    <!-- Age Display -->
+                    <div>
+                        <label for="age" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Age
+                        </label>
+                        <input
+                                type="number"
+                                id="age"
+                                name="age"
+                                readonly
+                                placeholder="Age will be calculated"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        >
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Gender <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                                id="gender"
+                                name="gender"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Blood Type -->
+                    <div>
+                        <label for="bloodType" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Blood Type <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                                id="bloodType"
+                                name="bloodType"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                            <option value="">Select Blood Type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+
+                    <!-- Contact Number -->
+                    <div>
+                        <label for="contactNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Contact Number <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="tel"
+                                id="contactNumber"
+                                name="contactNumber"
+                                required
+                                placeholder="Enter your mobile number"
+                                pattern="[0-9]{10}"
+                                title="Enter 10-digit mobile number"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                    </div>
+
+                    <!-- Email Address -->
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Email Address <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email address"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                        <small class="text-gray-500">For donation reminders and notifications</small>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="md:col-span-2">
+                        <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Address <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                                id="address"
+                                name="address"
+                                required
+                                rows="3"
+                                placeholder="Enter your complete address (Street, City, Province)"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation resize-none"
+                        ></textarea>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Password <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                placeholder="Create a secure password"
+                                minlength="8"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                        <small class="text-gray-500">Minimum 8 characters</small>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Confirm Password <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                required
+                                placeholder="Confirm your password"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none input-focus transition-all duration-200 form-field-animation"
+                        >
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="md:col-span-2">
+                        <div class="flex items-start">
+                            <input
+                                    type="checkbox"
+                                    id="terms"
+                                    name="terms"
+                                    required
+                                    class="mt-1 h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                            >
+                            <label for="terms" class="ml-3 text-sm text-gray-700">
+                                I agree to the <a href="#" class="text-red-600 hover:text-red-800 underline">Terms and Conditions</a>
+                                and <a href="#" class="text-red-600 hover:text-red-800 underline">Privacy Policy</a>.
+                                I confirm that all information provided is accurate and I am eligible to donate blood.
+                                <span class="text-red-500">*</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="md:col-span-2">
+                        <button
+                                type="submit"
+                                class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white font-bold py-4 px-6 rounded-lg hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ripple-effect"
+                        >
+                                <span class="flex items-center justify-center relative z-10">
+                                    <div class="heartbeat-icon mr-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </div>
+                                    Register as Life Saver
+                                </span>
+                        </button>
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="md:col-span-2 text-center">
+                        <p class="text-gray-600">
+                            Already have an account?
+                            <a href="/" class="text-red-600 hover:text-red-800 font-semibold underline">
+                                Login here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-8 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-6 form-container relative overflow-hidden">
+            <!-- Decorative pulse circle -->
+            <div class="absolute top-4 right-4 w-3 h-3 bg-red-400 rounded-full animate-ping"></div>
+            <div class="absolute top-4 right-4 w-3 h-3 bg-red-500 rounded-full"></div>
+
+            <h3 class="text-lg font-semibold gradient-text mb-3 flex items-center">
+                <div class="heartbeat-icon mr-2">
+                    <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                Donor Eligibility Requirements
+            </h3>
+            <ul class="text-red-700 space-y-2">
+                <li>• You must be between 18-65 years old to donate blood</li>
+                <li>• You must weigh at least 50kg (110 lbs)</li>
+                <li>• You must be in good health and feeling well</li>
+                <li>• You can donate whole blood every 8 weeks (56 days)</li>
+                <li>• Please bring a valid photo ID for verification</li>
+                <li>• Your NIC will serve as your unique donor identification</li>
+            </ul>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-8 mt-12">
+    <div class="container mx-auto px-4 text-center">
+        <p>&copy; 2025 Blood Donation System. All rights reserved.</p>
+        <p class="mt-2 text-gray-400">Saving lives, one donation at a time.</p>
+    </div>
+</footer>
+
+<script>
+    // Age calculation based on date of birth
+    document.getElementById('dateOfBirth').addEventListener('change', function() {
+        const dob = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        document.getElementById('age').value = age >= 0 ? age : '';
+    });
+
+    // Form validation
+    document.getElementById('donorRegistrationForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Passwords do not match. Please try again.');
+            return false;
+        }
+
+        // Basic password strength check
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            return false;
+        }
+
+        // Age validation (must be 18-65)
+        const age = parseInt(document.getElementById('age').value);
+
+        if (age < 18 || age > 65) {
+            e.preventDefault();
+            alert('You must be between 18 and 65 years old to register as a donor.');
+            return false;
+        }
+
+        // NIC validation
+        const nic = document.getElementById('nic').value;
+        const nicPattern = /^[0-9]{9}[vVxX]$|^[0-9]{12}$/;
+
+        if (!nicPattern.test(nic)) {
+            e.preventDefault();
+            alert('Please enter a valid NIC number (e.g., 123456789V or 123456789012).');
+            return false;
+        }
+
+        return true;
+    });
+
+    // Real-time password matching
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Passwords do not match');
+            this.classList.add('border-red-500');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('border-red-500');
+        }
+    });
+
+    // Phone number formatting (10 digits only)
+    document.getElementById('contactNumber').addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        this.value = value;
+    });
+
+    // NIC formatting
+    document.getElementById('nic').addEventListener('input', function() {
+        let value = this.value.toUpperCase();
+        // Allow only numbers and V/X at the end
+        value = value.replace(/[^0-9VX]/g, '');
+        this.value = value;
+    });
+</script>
+</body>
+</html>

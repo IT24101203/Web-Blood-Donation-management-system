@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLink - Create Your Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blood-red': '#dc2626',
+                        'blood-dark': '#b91c1c',
+                        'blood-light': '#fee2e2',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+<!-- Header -->
+<header class="bg-white shadow-lg border-b-4 border-blood-red">
+    <div class="container mx-auto px-6 py-4">
+        <nav class="flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-tint text-4xl text-blood-red"></i>
+                <h1 class="text-3xl font-bold text-blood-red">BloodLink</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-gray-600 hover:text-blood-red transition-colors">
+                    <i class="fas fa-sign-in-alt mr-1"></i> Back to Main Page
+                </a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- Registration Section -->
+<section class="py-12">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-blood-red mb-4">Healthcare Facility Registration</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Register your healthcare facility to receive blood donations
+            </p>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-blood-red to-blood-dark h-2"></div>
+                <div class="p-8">
+                    <div class="text-center mb-8">
+                        <div class="bg-blood-light rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-plus text-3xl text-blood-red"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-blood-red mb-2">Healthcare Facility Registration</h3>
+                        <p class="text-gray-600">Register to receive blood donations for your facility</p>
+                    </div>
+
+                    <!-- Alert Messages -->
+                    <div th:if="${error}" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center">
+                        <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                        <span class="text-red-700 font-medium" th:text="${error}"></span>
+                    </div>
+
+                    <form action="/receiver/register" method="post" class="space-y-8">
+                        <!-- Personal Information Section -->
+                        <div class="bg-gray-50 rounded-2xl p-6">
+                            <h4 class="text-xl font-bold text-blood-red mb-6 flex items-center">
+                                <i class="fas fa-user mr-2"></i> Personal Information
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="cnic" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        National Identity Card (NIC) *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-id-card absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text"
+                                               id="cnic"
+                                               name="nic"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Enter your NIC number"
+                                               required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="fullName" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Full Name *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text"
+                                               id="fullName"
+                                               name="fullName"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Enter your full name"
+                                               required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="dob" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Date of Birth *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-calendar absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="date"
+                                               id="dob"
+                                               name="dob"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="gender" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Gender *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-venus-mars absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <select id="gender"
+                                                name="gender"
+                                                class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                                required>
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="bg-gray-50 rounded-2xl p-6">
+                            <h4 class="text-xl font-bold text-blood-red mb-6 flex items-center">
+                                <i class="fas fa-phone mr-2"></i> Contact Information
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="contactNumber" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Contact Number *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text"
+                                               id="contactNumber"
+                                               name="contactNumber"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Enter your contact number"
+                                               required>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Email Address
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="email"
+                                               id="email"
+                                               name="email"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Enter your email address">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <label for="address" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Address
+                                </label>
+                                <div class="relative">
+                                    <i class="fas fa-map-marker-alt absolute left-4 top-4 text-gray-400"></i>
+                                    <textarea id="address"
+                                              name="address"
+                                              rows="3"
+                                              class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all resize-none"
+                                              placeholder="Enter your complete address"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Information Section -->
+                        <div class="bg-gray-50 rounded-2xl p-6">
+                            <h4 class="text-xl font-bold text-blood-red mb-6 flex items-center">
+                                <i class="fas fa-shield-alt mr-2"></i> Security Information
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Password *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="password"
+                                               id="password"
+                                               name="password"
+                                               class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Create a secure password"
+                                               minlength="8"
+                                               required>
+                                        <button type="button"
+                                                onclick="togglePassword('password')"
+                                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blood-red transition-colors">
+                                            <i class="fas fa-eye" id="password-toggle-icon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Password must be at least 8 characters long
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Confirm Password *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="password"
+                                               id="confirmPassword"
+                                               name="confirmPassword"
+                                               class="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Confirm your password"
+                                               required>
+                                        <button type="button"
+                                                onclick="togglePassword('confirmPassword')"
+                                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blood-red transition-colors">
+                                            <i class="fas fa-eye" id="confirmPassword-toggle-icon"></i>
+                                        </button>
+                                    </div>
+                                    <div id="password-match-message" class="text-xs mt-1 hidden">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        <span>Passwords match</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Information Section -->
+                        <div class="bg-blood-light rounded-2xl p-6">
+                            <h4 class="text-xl font-bold text-blood-red mb-6 flex items-center">
+                                <i class="fas fa-heartbeat mr-2"></i> Medical Information
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="bloodTypeNeeded" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Blood Type Needed *
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-tint absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <select id="bloodTypeNeeded"
+                                                name="bloodTypeNeeded"
+                                                class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                                required>
+                                            <option value="">Select Blood Type</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="hospitalPreference" class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Hospital Preference
+                                    </label>
+                                    <div class="relative">
+                                        <i class="fas fa-hospital absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input type="text"
+                                               id="hospitalPreference"
+                                               name="hospitalPreference"
+                                               class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all"
+                                               placeholder="Enter preferred hospital">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <label for="medicalCondition" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Medical Condition
+                                </label>
+                                <div class="relative">
+                                    <i class="fas fa-notes-medical absolute left-4 top-4 text-gray-400"></i>
+                                    <textarea id="medicalCondition"
+                                              name="medicalCondition"
+                                              rows="3"
+                                              class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blood-red focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-20 transition-all resize-none"
+                                              placeholder="Enter any medical conditions or notes"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit"
+                                    class="bg-gradient-to-r from-blood-red to-blood-dark text-white font-bold py-4 px-8 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 uppercase tracking-wide">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Create My Account
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-8">
+                        <p class="text-gray-600">
+                            Already have an account?
+                            <a href="/"
+                               class="text-blood-red font-semibold hover:text-blood-dark transition-colors border-b-2 border-transparent hover:border-blood-dark">
+                                <i class="fas fa-sign-in-alt mr-1"></i>Login Here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-8">
+    <div class="container mx-auto px-6 text-center">
+        <div class="flex items-center justify-center mb-4">
+            <i class="fas fa-heart text-blood-red mr-2"></i>
+            <span class="text-gray-600 font-semibold">Saving Lives, One Drop at a Time</span>
+        </div>
+        <p class="text-sm text-gray-500">
+            BloodLink Professional Blood Donation Management System
+        </p>
+    </div>
+</footer>
+
+<script>
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = document.getElementById(fieldId + '-toggle-icon');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Password confirmation validation
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const message = document.getElementById('password-match-message');
+
+        if (confirmPassword.length > 0) {
+            if (password === confirmPassword) {
+                message.className = 'text-xs mt-1 text-green-600';
+                message.innerHTML = '<i class="fas fa-check-circle mr-1"></i><span>Passwords match</span>';
+                message.classList.remove('hidden');
+            } else {
+                message.className = 'text-xs mt-1 text-red-600';
+                message.innerHTML = '<i class="fas fa-times-circle mr-1"></i><span>Passwords do not match</span>';
+                message.classList.remove('hidden');
+            }
+        } else {
+            message.classList.add('hidden');
+        }
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Passwords do not match. Please check and try again.');
+            return false;
+        }
+
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters long.');
+            return false;
+        }
+    });
+</script>
+</body>
+</html>

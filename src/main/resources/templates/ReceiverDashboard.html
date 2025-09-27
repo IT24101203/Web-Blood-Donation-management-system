@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Receiver Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blood-red': '#DC2626',
+                        'blood-dark': '#991B1B',
+                        'blood-light': '#FEE2E2'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="bg-blood-red rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                        <i class="fas fa-hospital text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-blood-red">Blood Donation System</h1>
+                        <p class="text-gray-600 text-sm">Healthcare Facility Portal</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="font-semibold text-gray-800" th:text="${receiver.fullName}">Dr. John Doe</p>
+                        <p class="text-sm text-gray-600" th:text="${receiver.nic}">123456789V</p>
+                    </div>
+                    <a href="/receiver/logout" class="bg-blood-red text-white px-4 py-2 rounded-lg hover:bg-blood-dark transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-blood-red to-blood-dark rounded-2xl p-8 text-white mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold mb-2">Welcome, <span th:text="${receiver.fullName}">Dr. John Doe</span></h2>
+                    <p class="text-lg opacity-90">Healthcare Facility Dashboard</p>
+                    <p class="text-sm opacity-75 mt-2">CNIC: <span th:text="${receiver.nic}">123456789V</span></p>
+                </div>
+                <div class="text-right">
+                    <div class="bg-white bg-opacity-20 rounded-xl p-4">
+                        <i class="fas fa-calendar-alt text-3xl mb-2"></i>
+                        <p class="text-sm">Registration Date</p>
+                        <p class="font-semibold" th:text="${#temporals.format(receiver.registrationDate, 'dd MMM yyyy')}">15 Jan 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Facility Information Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="bg-blood-light rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                            <i class="fas fa-hospital text-blood-red text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Facility Information</h3>
+                    </div>
+                    <a href="/receiver/edit-profile" class="bg-blood-red hover:bg-blood-dark text-white px-4 py-2 rounded-lg transition duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Profile
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-600">Hospital Preference</p>
+                        <p class="font-semibold" th:text="${receiver.hospitalPreference ?: 'Not specified'}">General Hospital</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Contact Number</p>
+                        <p class="font-semibold" th:text="${receiver.contactNumber}">0771234567</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Email</p>
+                        <p class="font-semibold" th:text="${receiver.email ?: 'Not provided'}">contact@hospital.com</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blood Requirements Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blood-light rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                        <i class="fas fa-tint text-blood-red text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Blood Requirements</h3>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-600">Blood Type Needed</p>
+                        <p class="font-semibold text-blood-red text-lg" th:text="${receiver.bloodTypeNeeded}">O+</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Priority Level</p>
+                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">High Priority</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Information Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blood-light rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                        <i class="fas fa-notes-medical text-blood-red text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Medical Information</h3>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-sm text-gray-600">Medical Condition</p>
+                        <p class="font-semibold" th:text="${receiver.medicalCondition ?: 'No specific conditions'}">Emergency Surgery</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Gender</p>
+                        <p class="font-semibold" th:text="${receiver.gender}">Male</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <a href="/receiver/search-donors" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-blood-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-search text-blood-red text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Search Donors</h3>
+                <p class="text-sm text-gray-600">Find compatible blood donors</p>
+            </a>
+
+            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-blood-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-calendar-plus text-blood-red text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Request Blood</h3>
+                <p class="text-sm text-gray-600">Submit blood request</p>
+            </a>
+
+            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-blood-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-history text-blood-red text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Request History</h3>
+                <p class="text-sm text-gray-600">View past requests</p>
+            </a>
+
+            <!-- Custom Care Support -->
+            <a href="/receiver-support" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+                <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Custom Care</h3>
+                <p class="text-sm text-gray-600">Contact support team</p>
+            </a>
+
+            <!-- Blood Inventory -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow cursor-pointer" onclick="showBloodInventory()">
+                <div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-tint text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 mb-2">Blood Inventory</h3>
+                <p class="text-sm text-gray-600">View available blood stock</p>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <div class="flex items-center mb-6">
+                <div class="bg-blood-light rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                    <i class="fas fa-clock text-blood-red text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Recent Activity</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-green-100 rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                        <i class="fas fa-check text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">Account Created</p>
+                        <p class="text-sm text-gray-600">Healthcare facility registered successfully</p>
+                        <p class="text-xs text-gray-500" th:text="${#temporals.format(receiver.registrationDate, 'dd MMM yyyy HH:mm')}">15 Jan 2024 10:30</p>
+                    </div>
+                </div>
+                <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                    <div class="bg-blue-100 rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                        <i class="fas fa-info text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">Profile Updated</p>
+                        <p class="text-sm text-gray-600">Medical information completed</p>
+                        <p class="text-xs text-gray-500">15 Jan 2024 10:35</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blood Inventory Modal -->
+    <div id="bloodInventoryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold text-white flex items-center">
+                            <i class="fas fa-tint mr-3"></i>
+                            Blood Inventory Overview
+                        </h3>
+                        <button onclick="closeBloodInventory()" class="text-white hover:text-gray-200 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="bloodInventoryLoading" class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-purple-600 text-3xl mb-4"></i>
+                        <p class="text-gray-600">Loading blood inventory...</p>
+                    </div>
+
+                    <!-- Blood Type Inventory Cards -->
+                    <div id="bloodInventoryCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" style="display: none;">
+                        <!-- Cards will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Inventory Summary -->
+                    <div id="bloodInventorySummary" class="bg-gray-50 rounded-lg p-6" style="display: none;">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Inventory Summary
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-white rounded-lg p-4 border border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="bg-green-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                        <i class="fas fa-check text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Total Available</p>
+                                        <p class="text-xl font-bold text-gray-900" id="totalAvailable">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 border border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="bg-yellow-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Expiring Soon</p>
+                                        <p class="text-xl font-bold text-gray-900" id="expiringSoon">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4 border border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="bg-red-100 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                                        <i class="fas fa-times text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Expired</p>
+                                        <p class="text-xl font-bold text-gray-900" id="expired">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2024 Blood Donation System. All rights reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">Healthcare facilities portal for blood donation management</p>
+        </div>
+    </footer>
+
+    <script>
+        // Blood Inventory Functions
+        function showBloodInventory() {
+            document.getElementById('bloodInventoryModal').classList.remove('hidden');
+            loadBloodInventoryForReceiver();
+        }
+
+        function closeBloodInventory() {
+            document.getElementById('bloodInventoryModal').classList.add('hidden');
+        }
+
+        // Load blood inventory data for receiver dashboard
+        async function loadBloodInventoryForReceiver() {
+            try {
+                const response = await fetch('/receiver/blood-inventory/summary');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayBloodInventoryForReceiver(result);
+                } else {
+                    showBloodInventoryError(result.message);
+                }
+            } catch (error) {
+                console.error('Error loading blood inventory:', error);
+                showBloodInventoryError('Error loading blood inventory. Please try again.');
+            }
+        }
+
+        // Display blood inventory data for receiver
+        function displayBloodInventoryForReceiver(data) {
+            // Hide loading
+            document.getElementById('bloodInventoryLoading').style.display = 'none';
+            document.getElementById('bloodInventoryCards').style.display = 'grid';
+            document.getElementById('bloodInventorySummary').style.display = 'block';
+
+            // Display blood type cards
+            const availableBlood = data.availableBlood || {};
+            const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+            
+            let cardsHTML = '';
+            let totalAvailable = 0;
+
+            bloodTypes.forEach(bloodType => {
+                const quantity = availableBlood[bloodType] || 0;
+                totalAvailable += quantity;
+                
+                let statusColor = 'gray';
+                let statusIcon = 'fas fa-tint';
+                
+                if (quantity > 20) {
+                    statusColor = 'green';
+                    statusIcon = 'fas fa-check-circle';
+                } else if (quantity > 10) {
+                    statusColor = 'yellow';
+                    statusIcon = 'fas fa-exclamation-triangle';
+                } else if (quantity > 0) {
+                    statusColor = 'red';
+                    statusIcon = 'fas fa-exclamation-circle';
+                } else {
+                    statusColor = 'gray';
+                    statusIcon = 'fas fa-times-circle';
+                }
+
+                cardsHTML += `
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-${statusColor}-500">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <div class="bg-${statusColor}-100 rounded-full w-12 h-12 flex items-center justify-center mr-3">
+                                    <i class="${statusIcon} text-${statusColor}-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-gray-900">${bloodType}</h4>
+                                    <p class="text-sm text-gray-600">Blood Type</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-3xl font-bold text-${statusColor}-600">${quantity}</p>
+                            <p class="text-sm text-gray-600">Units Available</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('bloodInventoryCards').innerHTML = cardsHTML;
+
+            // Update summary
+            document.getElementById('totalAvailable').textContent = totalAvailable;
+            document.getElementById('expiringSoon').textContent = data.expiringSoon ? data.expiringSoon.length : 0;
+            document.getElementById('expired').textContent = data.expired ? data.expired.length : 0;
+        }
+
+        // Show error message for blood inventory
+        function showBloodInventoryError(message) {
+            document.getElementById('bloodInventoryLoading').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                    <p class="text-red-600 mb-4">${message}</p>
+                    <button onclick="loadBloodInventoryForReceiver()" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-redo mr-2"></i>
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('bloodInventoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBloodInventory();
+            }
+        });
+    </script>
+</body>
+</html>

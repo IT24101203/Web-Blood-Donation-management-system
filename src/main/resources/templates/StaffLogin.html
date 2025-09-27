@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login - Blood Donation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'blood-red': '#DC2626',
+                        'blood-red-dark': '#B91C1C',
+                        'blood-red-light': '#FEE2E2'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-red-50 to-white">
+<!-- Header -->
+<header class="bg-white shadow-md border-b-4 border-blood-red">
+    <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-heart text-3xl text-blood-red"></i>
+                <h1 class="text-2xl font-bold text-gray-800">Blood Donation System</h1>
+            </div>
+            <nav>
+                <a href="/" class="text-gray-600 hover:text-blood-red transition-colors duration-200">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="container mx-auto px-6 py-12">
+    <div class="max-w-4xl mx-auto">
+        <!-- Page Title -->
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Staff Login Portal</h2>
+            <p class="text-lg text-gray-600">Enter your credentials to access your dashboard</p>
+        </div>
+
+        <!-- Role Information Cards (Display Only) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- Admin Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center border-l-4 border-blood-red">
+                <div class="bg-blood-red-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-2xl text-blood-red"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Admin</h3>
+                <p class="text-gray-600 text-sm">System Administrator</p>
+            </div>
+
+            <!-- Hospital Staff Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center border-l-4 border-blue-500">
+                <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-hospital text-2xl text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Hospital Staff</h3>
+                <p class="text-gray-600 text-sm">Hospital Personnel</p>
+            </div>
+
+            <!-- Customer Support Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center border-l-4 border-green-500">
+                <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-2xl text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Customer Support</h3>
+                <p class="text-gray-600 text-sm">Support Representative</p>
+            </div>
+
+            <!-- Doctor Card -->
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center border-l-4 border-purple-500">
+                <div class="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-md text-2xl text-purple-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Doctor</h3>
+                <p class="text-gray-600 text-sm">Medical Professional</p>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-xl p-8 border-t-4 border-blood-red">
+            <div class="text-center mb-6">
+                <div class="bg-blood-red-light rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-sign-in-alt text-3xl text-blood-red"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Staff Login</h3>
+                <p class="text-gray-600 text-sm mt-2">Your role will be automatically detected</p>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${errorMessage}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <form action="/staff/login" method="post" class="space-y-6">
+
+                <!-- Staff ID Field -->
+                <div class="space-y-2">
+                    <label for="staffId" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-id-card mr-2 text-blood-red"></i>Staff ID
+                    </label>
+                    <input type="text"
+                           id="staffId"
+                           name="staffId"
+                           required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blood-red focus:border-transparent transition-colors duration-200"
+                           placeholder="Enter your Staff ID"
+                           autocomplete="username">
+                </div>
+
+                <!-- Password Field -->
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-lock mr-2 text-blood-red"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blood-red focus:border-transparent transition-colors duration-200"
+                               placeholder="Enter your password"
+                               autocomplete="current-password">
+                        <button type="button"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blood-red transition-colors duration-200"
+                                onclick="togglePassword()">
+                            <i id="passwordToggle" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox"
+                               name="remember"
+                               class="w-4 h-4 text-blood-red border-gray-300 rounded focus:ring-blood-red">
+                        <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    </label>
+                    <a href="/staff/forgot-password"
+                       class="text-sm text-blood-red hover:underline transition-colors duration-200">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit"
+                        id="loginBtn"
+                        class="w-full bg-blood-red hover:bg-blood-red-dark text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blood-red focus:ring-opacity-50">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Login
+                </button>
+            </form>
+
+            <!-- Additional Information -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div class="text-center">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-info-circle text-blood-red mr-1"></i>
+                        Login Information
+                    </h4>
+                    <p class="text-xs text-gray-600 leading-relaxed">
+                        Use your assigned Staff ID and password. Your role and permissions will be automatically determined based on your credentials.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Additional Links -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 mb-3">Need assistance?</p>
+                <div class="flex justify-center space-x-6">
+                    <a href="/contact"
+                       class="text-sm text-blood-red hover:underline transition-colors duration-200 flex items-center">
+                        <i class="fas fa-phone mr-1"></i>IT Support
+                    </a>
+                    <a href="/"
+                       class="text-sm text-blood-red hover:underline transition-colors duration-200 flex items-center">
+                        <i class="fas fa-arrow-left mr-1"></i>Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white mt-16">
+    <div class="container mx-auto px-6 py-8">
+        <div class="text-center">
+            <p>&copy; 2025 Blood Donation System. All rights reserved.</p>
+            <p class="text-sm text-gray-400 mt-2">Saving lives through technology</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('password');
+        const passwordToggle = document.getElementById('passwordToggle');
+
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            passwordToggle.className = 'fas fa-eye-slash';
+        } else {
+            passwordField.type = 'password';
+            passwordToggle.className = 'fas fa-eye';
+        }
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const staffId = document.getElementById('staffId').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!staffId || !password) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return false;
+        }
+
+        if (staffId.length < 3) {
+            e.preventDefault();
+            alert('Staff ID must be at least 3 characters long.');
+            return false;
+        }
+    });
+
+    // Add loading state on form submission
+    document.querySelector('form').addEventListener('submit', function() {
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+        loginBtn.disabled = true;
+        loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
+    });
+
+    // Add subtle animations to form elements
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('transform', 'scale-105');
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('transform', 'scale-105');
+            });
+        });
+
+        // Add floating animation to the login icon
+        const loginIcon = document.querySelector('.fa-sign-in-alt');
+        if (loginIcon && loginIcon.parentElement.classList.contains('rounded-full')) {
+            setInterval(() => {
+                loginIcon.parentElement.classList.add('animate-pulse');
+                setTimeout(() => {
+                    loginIcon.parentElement.classList.remove('animate-pulse');
+                }, 2000);
+            }, 4000);
+        }
+    });
+
+    // Auto-focus on staff ID field when page loads
+    window.addEventListener('load', function() {
+        document.getElementById('staffId').focus();
+    });
+</script>
+</body>
+</html>
