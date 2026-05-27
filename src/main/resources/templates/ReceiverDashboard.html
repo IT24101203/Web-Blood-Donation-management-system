@@ -77,6 +77,37 @@
             <span th:text="${errorMessage}"></span>
         </div>
 
+        <!-- Notifications Section -->
+        <div id="notificationsSection" class="mb-6">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-blood-red to-blood-dark px-4 py-3">
+                    <h3 class="text-lg font-bold text-white flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-2">
+                                <i class="fas fa-bell text-white text-sm"></i>
+                            </div>
+                            <span class="text-sm">Blood Request Notifications</span>
+                            <span id="notificationCount" class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2 hidden">0</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="loadNotifications()" class="text-white hover:text-red-200 text-sm">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button onclick="hideNotifications()" class="text-white hover:text-red-200 text-sm" title="Hide notifications">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        </div>
+                    </h3>
+                </div>
+                <div id="notificationsList" class="p-4">
+                    <div class="text-center py-3">
+                        <i class="fas fa-spinner fa-spin text-blood-red text-lg mb-2"></i>
+                        <p class="text-gray-600 text-sm">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Dashboard Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             <!-- Facility Information Card -->
@@ -160,7 +191,7 @@
                 <p class="text-sm text-gray-600">Find compatible blood donors</p>
             </a>
 
-            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+            <a href="/receiver/blood-request" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
                 <div class="bg-blood-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-calendar-plus text-blood-red text-2xl"></i>
                 </div>
@@ -168,13 +199,13 @@
                 <p class="text-sm text-gray-600">Submit blood request</p>
             </a>
 
-            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow cursor-pointer" onclick="showRequestHistory()">
                 <div class="bg-blood-light rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-history text-blood-red text-2xl"></i>
                 </div>
                 <h3 class="font-bold text-gray-800 mb-2">Request History</h3>
                 <p class="text-sm text-gray-600">View past requests</p>
-            </a>
+            </div>
 
             <!-- Custom Care Support -->
             <a href="/receiver-support" class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
@@ -302,6 +333,36 @@
         </div>
     </div>
 
+    <!-- Request History Modal -->
+    <div id="requestHistoryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-8xl w-full max-h-[95vh] overflow-y-auto">
+                <div class="bg-gradient-to-r from-blood-red to-blood-dark px-6 py-4 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-2xl font-bold text-white flex items-center">
+                            <i class="fas fa-history mr-3"></i>
+                            Blood Request History
+                        </h3>
+                        <button onclick="closeRequestHistory()" class="text-white hover:text-gray-200 text-2xl">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div id="requestHistoryLoading" class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-blood-red text-3xl mb-4"></i>
+                        <p class="text-gray-600">Loading your blood request history...</p>
+                    </div>
+                    
+                    <div id="requestHistoryTable" style="display: none;">
+                        <!-- Request history table will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8 mt-12">
         <div class="container mx-auto px-6 text-center">
@@ -421,6 +482,299 @@
             if (e.target === this) {
                 closeBloodInventory();
             }
+        });
+
+        // Blood Request History Functions
+        function showRequestHistory() {
+            document.getElementById('requestHistoryModal').classList.remove('hidden');
+            loadBloodRequestHistory();
+        }
+
+        function closeRequestHistory() {
+            document.getElementById('requestHistoryModal').classList.add('hidden');
+        }
+
+        function loadBloodRequestHistory() {
+            const loadingDiv = document.getElementById('requestHistoryLoading');
+            const tableDiv = document.getElementById('requestHistoryTable');
+            
+            // Show loading, hide table
+            loadingDiv.style.display = 'block';
+            tableDiv.style.display = 'none';
+            
+            fetch('/receiver/blood-request-history')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayBloodRequestHistory(data.bloodRequests);
+                    } else {
+                        showRequestHistoryError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading blood request history:', error);
+                    showRequestHistoryError('Error loading blood request history. Please try again.');
+                });
+        }
+
+        function displayBloodRequestHistory(requests) {
+            const loadingDiv = document.getElementById('requestHistoryLoading');
+            const tableDiv = document.getElementById('requestHistoryTable');
+            
+            // Hide loading, show table
+            loadingDiv.style.display = 'none';
+            tableDiv.style.display = 'block';
+            
+            if (!requests || requests.length === 0) {
+                tableDiv.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                        <p class="text-gray-600">No blood requests found</p>
+                        <p class="text-sm text-gray-500 mt-2">Submit a blood request to see it here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-lg">
+                        <thead class="bg-gradient-to-r from-blood-red to-blood-dark text-white">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Blood Type</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Quantity</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Priority</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Hospital</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Request Date</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Needed By</th>
+                                <th class="px-6 py-4 text-left font-semibold text-xl">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            requests.forEach(request => {
+                const bloodType = request.bloodTypeNeeded || 'N/A';
+                const quantity = request.quantity || 0;
+                const priority = request.priority || 'Normal';
+                const hospital = request.hospital || 'N/A';
+                const requestDate = request.requestDate ? new Date(request.requestDate).toLocaleDateString() : 'N/A';
+                const neededByDate = request.neededByDate ? new Date(request.neededByDate).toLocaleDateString() : 'N/A';
+                
+                // Determine status and styling
+                let statusBadge = '';
+                let statusClass = '';
+                if (request.completionDate) {
+                    statusBadge = 'Completed';
+                    statusClass = 'bg-green-100 text-green-800';
+                } else if (request.approvedDate) {
+                    statusBadge = 'Approved';
+                    statusClass = 'bg-blue-100 text-blue-800';
+                } else {
+                    statusBadge = 'Pending';
+                    statusClass = 'bg-yellow-100 text-yellow-800';
+                }
+
+                // Priority styling
+                let priorityClass = '';
+                switch(priority) {
+                    case 'Critical': priorityClass = 'bg-red-100 text-red-800'; break;
+                    case 'High': priorityClass = 'bg-orange-100 text-orange-800'; break;
+                    case 'Normal': priorityClass = 'bg-green-100 text-green-800'; break;
+                    case 'Low': priorityClass = 'bg-blue-100 text-blue-800'; break;
+                    default: priorityClass = 'bg-gray-100 text-gray-800';
+                }
+
+                tableHTML += `
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg font-semibold">${bloodType}</span>
+                        </td>
+                        <td class="px-6 py-4 font-semibold text-green-600 text-xl">${quantity} units</td>
+                        <td class="px-6 py-4">
+                            <span class="px-4 py-2 rounded-full text-lg font-semibold ${priorityClass}">${priority}</span>
+                        </td>
+                        <td class="px-6 py-4 text-lg font-medium">${hospital}</td>
+                        <td class="px-6 py-4 text-lg">${requestDate}</td>
+                        <td class="px-6 py-4 text-lg">${neededByDate}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-4 py-2 rounded-full text-lg font-semibold ${statusClass}">${statusBadge}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            tableDiv.innerHTML = tableHTML;
+        }
+
+        function showRequestHistoryError(message) {
+            const loadingDiv = document.getElementById('requestHistoryLoading');
+            const tableDiv = document.getElementById('requestHistoryTable');
+            
+            loadingDiv.style.display = 'none';
+            tableDiv.style.display = 'block';
+            
+            tableDiv.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                    <p class="text-red-600 mb-4">${message}</p>
+                    <button onclick="loadBloodRequestHistory()" class="mt-4 bg-blood-red hover:bg-blood-dark text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-redo mr-2"></i>
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('requestHistoryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRequestHistory();
+            }
+        });
+
+        // Notification functions
+        async function loadNotifications() {
+            try {
+                console.log('🔔 Loading receiver notifications...');
+                const response = await fetch('/receiver/notifications');
+                const notifications = await response.json();
+                
+                console.log('📨 Received notifications:', notifications);
+                displayNotifications(notifications);
+            } catch (error) {
+                console.error('❌ Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-2"></i>
+                        <p class="text-red-600">Error loading notifications</p>
+                        <button onclick="loadNotifications()" class="mt-2 bg-blood-red hover:bg-blood-dark text-white px-4 py-2 rounded">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function displayNotifications(notifications) {
+            const notificationsList = document.getElementById('notificationsList');
+            const notificationCount = document.getElementById('notificationCount');
+            
+            if (!notifications || notifications.length === 0) {
+                notificationsList.innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash text-gray-400 text-2xl mb-2"></i>
+                        <p class="text-gray-600 text-sm">No notifications yet</p>
+                        <p class="text-gray-500 text-xs">You'll receive notifications about your blood requests here</p>
+                    </div>
+                `;
+                notificationCount.classList.add('hidden');
+                return;
+            }
+
+            // Show notification count
+            const unreadCount = notifications.filter(n => !n.read).length;
+            if (unreadCount > 0) {
+                notificationCount.textContent = unreadCount;
+                notificationCount.classList.remove('hidden');
+            } else {
+                notificationCount.classList.add('hidden');
+            }
+
+            // Display notifications (newest first)
+            const sortedNotifications = notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            notificationsList.innerHTML = sortedNotifications.map(notification => {
+                const isApproved = notification.status === 'APPROVED';
+                const isRejected = notification.status === 'REJECTED';
+                const isCompleted = notification.status === 'COMPLETED';
+                const isRead = notification.read;
+                
+                let borderColor, bgColor, iconClass, titleColor, iconName;
+                
+                if (isApproved) {
+                    borderColor = 'border-green-500';
+                    bgColor = 'bg-green-50';
+                    iconClass = 'fa-check-circle text-green-600';
+                    titleColor = 'text-green-800';
+                    iconName = 'fa-check-circle';
+                } else if (isRejected) {
+                    borderColor = 'border-red-500';
+                    bgColor = 'bg-red-50';
+                    iconClass = 'fa-times-circle text-red-600';
+                    titleColor = 'text-red-800';
+                    iconName = 'fa-times-circle';
+                } else if (isCompleted) {
+                    borderColor = 'border-purple-500';
+                    bgColor = 'bg-purple-50';
+                    iconClass = 'fa-gift text-purple-600';
+                    titleColor = 'text-purple-800';
+                    iconName = 'fa-gift';
+                } else {
+                    borderColor = 'border-blue-500';
+                    bgColor = 'bg-blue-50';
+                    iconClass = 'fa-info-circle text-blue-600';
+                    titleColor = 'text-blue-800';
+                    iconName = 'fa-info-circle';
+                }
+                
+                return `
+                    <div class="border-l-4 ${borderColor} ${bgColor} rounded-r-lg p-3 mb-3 ${isRead ? 'opacity-75' : ''}">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-1">
+                                    <i class="fas ${iconClass} mr-2 text-sm"></i>
+                                <h4 class="font-medium ${titleColor} text-sm">
+                                    ${isCompleted ? 'Blood Ready for Collection!' : `Blood Request ${notification.status}`}
+                                </h4>
+                                    ${!isRead ? '<span class="bg-blood-red text-white text-xs rounded-full px-2 py-1 ml-2">New</span>' : ''}
+                                </div>
+                                <p class="text-gray-700 text-sm mb-2">${notification.message}</p>
+                                ${notification.requestId ? `
+                                    <div class="bg-white p-2 rounded border-l-2 ${isApproved ? 'border-green-300' : isRejected ? 'border-red-300' : isCompleted ? 'border-purple-300' : 'border-blue-300'}">
+                                        <p class="text-xs font-medium text-gray-600 mb-1">Request ID:</p>
+                                        <p class="text-gray-700 text-xs font-mono">${notification.requestId}</p>
+                                    </div>
+                                ` : ''}
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    ${new Date(notification.timestamp).toLocaleString()}
+                                </p>
+                            </div>
+                            ${!isRead ? `
+                                <button onclick="markAsRead('${notification.timestamp}')" class="text-gray-400 hover:text-gray-600 ml-2 text-sm">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function markAsRead(timestamp) {
+            try {
+                // In a real system, you'd make an API call to mark as read
+                // For now, we'll just reload notifications
+                loadNotifications();
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+
+        function hideNotifications() {
+            document.getElementById('notificationsSection').style.display = 'none';
+        }
+
+        // Load notifications when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
         });
     </script>
 </body>

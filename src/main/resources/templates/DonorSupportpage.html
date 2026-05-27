@@ -325,9 +325,6 @@
 <!-- Message History Section -->
 <div th:if="${donor != null}" class="message-history">
     <h2>📬 Your Support Messages</h2>
-    <div th:if="${showAllMessages}" class="success-message" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; margin-bottom: 15px;">
-        <strong>ℹ️ Testing Mode:</strong> No messages found for your account, showing all messages in the database for testing purposes.
-    </div>
     <button class="toggle-messages" onclick="toggleMessages()">
         <span id="toggleText">Show Message History</span>
     </button>

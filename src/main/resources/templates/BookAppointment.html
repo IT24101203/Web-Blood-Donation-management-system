@@ -153,11 +153,15 @@
 
             <div class="flex items-center justify-between">
               <div class="flex items-center">
-                <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                <span class="text-sm font-medium text-green-600">Available</span>
+                <div th:class="${slot.availableDonors > 0 ? 'w-3 h-3 bg-green-500 rounded-full mr-2' : 'w-3 h-3 bg-red-500 rounded-full mr-2'}" class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                <span th:class="${slot.availableDonors > 0 ? 'text-sm font-medium text-green-600' : 'text-sm font-medium text-red-600'}" 
+                      th:text="${slot.availableDonors > 0 ? 'Available' : 'Fully Booked'}" 
+                      class="text-sm font-medium text-green-600">Available</span>
               </div>
-              <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 text-sm font-semibold">
-                Select
+              <button th:disabled="${slot.availableDonors <= 0}"
+                      th:class="${slot.availableDonors > 0 ? 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 text-sm font-semibold' : 'bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed text-sm font-semibold'}"
+                      class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 text-sm font-semibold">
+                <span th:text="${slot.availableDonors > 0 ? 'Select' : 'Full'}">Select</span>
               </button>
             </div>
           </div>
@@ -253,6 +257,13 @@
     });
 
     function selectSlot(slotElement) {
+      // Check if slot is available
+      const availableDonors = parseInt(slotElement.dataset.currentBookings);
+      if (availableDonors <= 0) {
+        alert('This slot is fully booked. Please select another slot.');
+        return;
+      }
+
       // Remove previous selection
       document.querySelectorAll('.slot-card').forEach(card => {
         card.classList.remove('selected');

@@ -425,7 +425,7 @@
             <span class="icon">📅</span>
             Donor Appointments
         </a>
-        <a href="#requests" class="nav-item">
+        <a href="#requests" class="nav-item" onclick="showBloodRequests()">
             <span class="icon">📋</span>
             Blood Requests
         </a>
@@ -600,63 +600,19 @@
                 </div>
                 <div class="card-content">
                     <div id="bloodRequests">
-                        <div class="request-item">
-                            <div class="request-header">
-                                <div class="request-info">
-                                    <h4>Emergency Request - John Smith</h4>
-                                    <p><strong>Blood Type:</strong> O- | <strong>Units:</strong> 3 | <strong>Priority:</strong> <span class="status-indicator status-urgent">URGENT</span></p>
-                                    <p><strong>Hospital:</strong> Emergency Ward | <strong>Contact:</strong> Dr. Anderson</p>
-                                </div>
-                                <div class="request-actions">
-                                    <button class="btn btn-success btn-small" onclick="approveRequest(1)">
-                                        <span class="icon">✅</span>
-                                        Approve
-                                    </button>
-                                    <button class="btn btn-danger btn-small" onclick="rejectRequest(1)">
-                                        <span class="icon">❌</span>
-                                        Reject
-                                    </button>
-                                </div>
-                            </div>
+                        <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="color: #dc3545; margin-bottom: 15px;">📋 Pending Blood Requests</h4>
+                            <p style="color: #666; margin-bottom: 15px;">Review and approve blood requests from receivers</p>
+                            <button class="btn btn-primary" onclick="loadPendingBloodRequests()" style="font-size: 14px; padding: 10px 20px;">
+                                <span class="icon">🔄</span>
+                                Load Pending Requests
+                            </button>
                         </div>
-
-                        <div class="request-item">
-                            <div class="request-header">
-                                <div class="request-info">
-                                    <h4>Scheduled Surgery - Maria Garcia</h4>
-                                    <p><strong>Blood Type:</strong> A+ | <strong>Units:</strong> 2 | <strong>Priority:</strong> <span class="status-indicator status-normal">NORMAL</span></p>
-                                    <p><strong>Hospital:</strong> Surgical Unit | <strong>Contact:</strong> Dr. Wilson</p>
-                                </div>
-                                <div class="request-actions">
-                                    <button class="btn btn-success btn-small" onclick="approveRequest(2)">
-                                        <span class="icon">✅</span>
-                                        Approve
-                                    </button>
-                                    <button class="btn btn-danger btn-small" onclick="rejectRequest(2)">
-                                        <span class="icon">❌</span>
-                                        Reject
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="request-item">
-                            <div class="request-header">
-                                <div class="request-info">
-                                    <h4>Cancer Treatment - David Brown</h4>
-                                    <p><strong>Blood Type:</strong> B+ | <strong>Units:</strong> 4 | <strong>Priority:</strong> <span class="status-indicator status-normal">NORMAL</span></p>
-                                    <p><strong>Hospital:</strong> Oncology Ward | <strong>Contact:</strong> Dr. Johnson</p>
-                                </div>
-                                <div class="request-actions">
-                                    <button class="btn btn-success btn-small" onclick="approveRequest(3)">
-                                        <span class="icon">✅</span>
-                                        Approve
-                                    </button>
-                                    <button class="btn btn-danger btn-small" onclick="rejectRequest(3)">
-                                        <span class="icon">❌</span>
-                                        Reject
-                                    </button>
-                                </div>
+                        
+                        <div id="pendingBloodRequestsList">
+                            <div style="text-align: center; padding: 20px; color: #666;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+                                <p>Click "Load Pending Requests" to view blood requests</p>
                             </div>
                         </div>
                     </div>
@@ -712,14 +668,58 @@
             </div>
             <div class="card-content">
                 <div class="search-container">
-                    <button class="btn btn-primary" onclick="refreshAppointments()">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                        <input type="date" id="appointmentDateFilter" 
+                               placeholder="Filter by date..." 
+                               style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;"
+                               onchange="filterAppointmentsByDate()">
+                        <button class="btn btn-primary" onclick="refreshAppointments()">
+                            <span class="icon">🔄</span>
+                            Refresh
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearAppointmentFilters()" 
+                                style="background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">
+                            <span class="icon">❌</span>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="appointmentsTable">
+                    <!-- Appointments will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Requests Table Section (Hidden by default) -->
+        <div id="bloodRequestsSection" class="dashboard-card" style="display: none;">
+            <div class="card-header">
+                <h3>
+                    <span class="icon">📋</span>
+                    Blood Requests Management
+                </h3>
+                <p>View and manage blood requests from receivers</p>
+            </div>
+            <div class="card-content">
+                <div class="search-container">
+                    <select class="form-control" id="requestFilter">
+                        <option value="">All Requests</option>
+                        <option value="Normal">Normal Priority</option>
+                        <option value="High">High Priority</option>
+                        <option value="Critical">Critical Priority</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="filterBloodRequests()">
+                        <span class="icon">🔍</span>
+                        Filter
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshBloodRequests()">
                         <span class="icon">🔄</span>
                         Refresh
                     </button>
                 </div>
                 
-                <div id="appointmentsTable">
-                    <!-- Appointments will be loaded here -->
+                <div id="bloodRequestsTable">
+                    <!-- Blood requests will be loaded here -->
                 </div>
             </div>
         </div>
@@ -912,31 +912,6 @@
         }
     }
 
-    // Approve blood request
-    function approveRequest(requestId) {
-        const requestElement = document.querySelector(`[onclick="approveRequest(${requestId})"]`).closest('.request-item');
-        requestElement.style.background = '#d4edda';
-        requestElement.style.border = '1px solid #28a745';
-
-        // Disable buttons
-        const actions = requestElement.querySelector('.request-actions');
-        actions.innerHTML = '<span style="color: #28a745; font-weight: bold;">✅ APPROVED</span>';
-
-        alert(`Blood request #${requestId} has been approved and assigned to the receiver.`);
-    }
-
-    // Reject blood request
-    function rejectRequest(requestId) {
-        const requestElement = document.querySelector(`[onclick="rejectRequest(${requestId})"]`).closest('.request-item');
-        requestElement.style.background = '#f8d7da';
-        requestElement.style.border = '1px solid #dc3545';
-
-        // Disable buttons
-        const actions = requestElement.querySelector('.request-actions');
-        actions.innerHTML = '<span style="color: #dc3545; font-weight: bold;">❌ REJECTED</span>';
-
-        alert(`Blood request #${requestId} has been rejected.`);
-    }
 
     // Set minimum date to today for expiry date input
     setDateLimits();
@@ -961,6 +936,7 @@
         // Hide other sections
         document.getElementById('appointmentsSection').style.display = 'none';
         document.getElementById('bloodInventorySection').style.display = 'none';
+        document.getElementById('bloodRequestsSection').style.display = 'none';
         
         // Update navigation active state
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -972,6 +948,7 @@
         // Hide other sections
         document.querySelector('.dashboard-grid').style.display = 'none';
         document.getElementById('appointmentsSection').style.display = 'none';
+        document.getElementById('bloodRequestsSection').style.display = 'none';
         
         // Show blood inventory section
         document.getElementById('bloodInventorySection').style.display = 'block';
@@ -989,6 +966,7 @@
         // Hide other sections
         document.querySelector('.dashboard-grid').style.display = 'none';
         document.getElementById('bloodInventorySection').style.display = 'none';
+        document.getElementById('bloodRequestsSection').style.display = 'none';
         
         // Show appointments section
         document.getElementById('appointmentsSection').style.display = 'block';
@@ -999,6 +977,24 @@
         
         // Load appointments
         loadAppointments();
+    }
+
+    // Show blood requests section
+    function showBloodRequests() {
+        // Hide other sections
+        document.querySelector('.dashboard-grid').style.display = 'none';
+        document.getElementById('bloodInventorySection').style.display = 'none';
+        document.getElementById('appointmentsSection').style.display = 'none';
+        
+        // Show blood requests section
+        document.getElementById('bloodRequestsSection').style.display = 'block';
+        
+        // Update navigation active state
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.querySelector('a[href="#requests"]').classList.add('active');
+        
+        // Load blood requests
+        loadBloodRequests();
     }
 
     // Load appointments from server
@@ -1229,13 +1225,10 @@
                 <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <thead style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white;">
                         <tr>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Appointment ID</th>
                             <th style="padding: 15px; text-align: left; font-weight: 600;">Donor NIC</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Slot ID</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Slot Location</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Booking Date</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Booking Time</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600;">Status</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Location</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Slot Date</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Slot Time</th>
                             <th style="padding: 15px; text-align: center; font-weight: 600;">Actions</th>
                         </tr>
                     </thead>
@@ -1260,17 +1253,16 @@
                 appointmentId, donorNic, slotId, slotLocation, date, time, status
             });
             
+            // Get slot time and slot date from appointment data
+            const slotTime = appointment.slotTime || 'N/A';
+            const slotDate = appointment.slotDate || 'N/A';
+            
             tableHTML += `
                 <tr style="border-bottom: 1px solid #e9ecef;">
-                    <td style="padding: 15px; font-weight: 500; color: #dc3545;">${appointmentId}</td>
                     <td style="padding: 15px; font-weight: 500;">${donorNic}</td>
-                    <td style="padding: 15px; font-weight: 500; color: #dc3545;">${slotId}</td>
                     <td style="padding: 15px; font-weight: 500; color: #28a745;">${slotLocation}</td>
-                    <td style="padding: 15px;">${date}</td>
-                    <td style="padding: 15px;">${time}</td>
-                    <td style="padding: 15px;">
-                        <span class="status-indicator ${statusClass}">${status}</span>
-                    </td>
+                    <td style="padding: 15px; font-weight: 500;">${slotDate}</td>
+                    <td style="padding: 15px; font-weight: 500;">${slotTime}</td>
                     <td style="padding: 15px; text-align: center;">
                         <button onclick="deleteAppointment('${appointmentId}', '${donorNic}')" 
                                 class="btn-delete" 
@@ -1337,6 +1329,46 @@
         }
     }
 
+    // Filter appointments by date
+    function filterAppointmentsByDate() {
+        const selectedDate = document.getElementById('appointmentDateFilter').value;
+        
+        if (!selectedDate) {
+            // If no date selected, show all appointments
+            displayAppointments();
+            return;
+        }
+        
+        console.log('Filtering appointments by date:', selectedDate);
+        
+        // Filter appointments data by the selected date
+        const filteredData = appointmentsData.filter(appointment => {
+            const appointmentDate = appointment.slotDate || appointment.date || appointment.formattedDate;
+            
+            if (!appointmentDate) {
+                return false;
+            }
+            
+            // Convert both dates to the same format for comparison
+            const appointmentDateStr = appointmentDate.toString();
+            const selectedDateStr = selectedDate.toString();
+            
+            console.log('Comparing:', appointmentDateStr, 'with', selectedDateStr);
+            
+            return appointmentDateStr === selectedDateStr;
+        });
+        
+        console.log('Filtered appointments count:', filteredData.length);
+        displayAppointments(filteredData);
+    }
+    
+    // Clear all appointment filters
+    function clearAppointmentFilters() {
+        document.getElementById('appointmentDateFilter').value = '';
+        displayAppointments(); // Show all appointments
+        console.log('Appointment filters cleared');
+    }
+
     // Delete appointment function
     function deleteAppointment(appointmentId, donorNic) {
         if (confirm(`Are you sure you want to delete appointment ${appointmentId} for donor ${donorNic}?\n\nThis action cannot be undone.`)) {
@@ -1373,6 +1405,469 @@
             .catch(error => {
                 console.error('Error deleting appointment:', error);
                 alert(`❌ Error deleting appointment: ${error.message}`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Blood requests functionality
+    let bloodRequestsData = [];
+
+    // Load pending blood requests for dashboard
+    function loadPendingBloodRequests() {
+        console.log('Loading pending blood requests for dashboard...');
+        fetch('/hospital/blood-requests')
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Raw blood requests data from database:', data);
+                
+                if (!data.success) {
+                    document.getElementById('pendingBloodRequestsList').innerHTML = 
+                        '<div style="text-align: center; padding: 20px; color: #dc3545;">❌ Error: ' + data.message + '</div>';
+                    return;
+                }
+                
+                if (!data.bloodRequests || data.bloodRequests.length === 0) {
+                    document.getElementById('pendingBloodRequestsList').innerHTML = 
+                        '<div style="text-align: center; padding: 20px; color: #666;">No blood requests found in database.</div>';
+                    return;
+                }
+                
+                // Filter only pending requests (not approved and not completed)
+                const pendingRequests = data.bloodRequests.filter(request => 
+                    !request.approvedDate && !request.completionDate
+                );
+                
+                if (pendingRequests.length === 0) {
+                    document.getElementById('pendingBloodRequestsList').innerHTML = 
+                        '<div style="text-align: center; padding: 20px; color: #28a745;">✅ No pending blood requests - all requests have been processed!</div>';
+                    return;
+                }
+                
+                displayPendingBloodRequests(pendingRequests);
+            })
+            .catch(error => {
+                console.error('Error loading pending blood requests:', error);
+                document.getElementById('pendingBloodRequestsList').innerHTML = 
+                    '<div style="text-align: center; padding: 20px; color: #dc3545;">❌ Error loading blood requests: ' + error.message + '</div>';
+            });
+    }
+
+    // Display pending blood requests in simplified format
+    function displayPendingBloodRequests(pendingRequests) {
+        const container = document.getElementById('pendingBloodRequestsList');
+        
+        console.log('Displaying pending blood requests:', pendingRequests);
+        
+        let requestsHTML = '';
+        
+        pendingRequests.forEach((request, index) => {
+            const receiverName = request.receiverName || 'Unknown Receiver';
+            const bloodType = request.bloodTypeNeeded || 'N/A';
+            const quantity = request.quantity || 0;
+            const requestId = request.requestId || 'N/A';
+            
+            requestsHTML += `
+                <div class="request-item" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin-bottom: 15px; transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <h4 style="color: #dc3545; font-size: 16px; margin-bottom: 8px;">${receiverName}</h4>
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div>
+                                    <span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${bloodType}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #28a745; font-weight: bold; font-size: 16px;">${quantity} units</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="approveBloodRequest('${requestId}')" 
+                                    class="btn-success btn-small" 
+                                    title="Approve Request"
+                                    style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                ✅ Approve
+                            </button>
+                            <button onclick="rejectBloodRequest('${requestId}')" 
+                                    class="btn-danger btn-small" 
+                                    title="Reject Request"
+                                    style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                ❌ Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = requestsHTML;
+    }
+
+    // Load blood requests from server
+    function loadBloodRequests() {
+        console.log('Loading blood requests from database...');
+        fetch('/hospital/blood-requests')
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Raw blood requests data from database:', data);
+                
+                if (!data.success) {
+                    document.getElementById('bloodRequestsTable').innerHTML = 
+                        '<div style="text-align: center; padding: 20px; color: #dc3545;">❌ Error: ' + data.message + '</div>';
+                    return;
+                }
+                
+                if (!data.bloodRequests || data.bloodRequests.length === 0) {
+                    document.getElementById('bloodRequestsTable').innerHTML = 
+                        '<div style="text-align: center; padding: 20px; color: #666;">No blood requests found in database.</div>';
+                    return;
+                }
+                
+                bloodRequestsData = data.bloodRequests;
+                console.log('Blood requests data stored:', bloodRequestsData);
+                displayBloodRequests();
+            })
+            .catch(error => {
+                console.error('Error loading blood requests:', error);
+                document.getElementById('bloodRequestsTable').innerHTML = 
+                    '<div style="text-align: center; padding: 20px; color: #dc3545;">❌ Error loading blood requests: ' + error.message + '</div>';
+            });
+    }
+
+    // Display blood requests in table format
+    function displayBloodRequests(filteredData = null) {
+        const data = filteredData || bloodRequestsData;
+        const container = document.getElementById('bloodRequestsTable');
+        
+        console.log('Displaying blood requests with data:', data);
+        console.log('Data length:', data.length);
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No blood requests found.</div>';
+            return;
+        }
+
+        let tableHTML = `
+            <div style="overflow-x: auto; margin-top: 20px;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <thead style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white;">
+                        <tr>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Request ID</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Receiver Name</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Blood Type</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Quantity</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Priority</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Hospital</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600;">Needed By</th>
+                            <th style="padding: 15px; text-align: center; font-weight: 600;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        data.forEach((request, index) => {
+            console.log(`Processing blood request ${index}:`, request);
+            
+            const priorityClass = getBloodRequestPriorityClass(request.priority);
+            const requestId = request.requestId || 'N/A';
+            const receiverName = request.receiverName || 'N/A';
+            const bloodType = request.bloodTypeNeeded || 'N/A';
+            const quantity = request.quantity || 0;
+            const priority = request.priority || 'Normal';
+            const hospital = request.hospital || 'N/A';
+            const neededByDate = request.neededByDate ? new Date(request.neededByDate).toLocaleDateString() : 'N/A';
+            const notes = request.notes || '';
+            
+            // Check request status
+            const isApproved = request.approvedDate && !request.completionDate;
+            const isCompleted = request.completionDate;
+            const isPending = !request.approvedDate && !request.completionDate;
+            
+            // Check if request is urgent based on needed by date
+            const isUrgent = request.neededByDate && new Date(request.neededByDate) <= new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+            const rowStyle = isUrgent ? 'background-color: #fff5f5;' : '';
+            
+            // Generate action buttons based on status
+            let actionButtons = '';
+            if (isPending) {
+                actionButtons = `
+                    <button onclick="approveBloodRequest('${requestId}')" 
+                            class="btn-success btn-small" 
+                            title="Approve Request"
+                            style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px;">
+                        ✅ Approve
+                    </button>
+                    <button onclick="rejectBloodRequest('${requestId}')" 
+                            class="btn-danger btn-small" 
+                            title="Reject Request"
+                            style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        ❌ Reject
+                    </button>
+                `;
+            } else if (isApproved) {
+                actionButtons = `
+                    <button onclick="completeBloodRequest('${requestId}')" 
+                            class="btn-primary btn-small" 
+                            title="Mark as Completed"
+                            style="background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        🎯 Complete
+                    </button>
+                `;
+            } else if (isCompleted) {
+                actionButtons = `
+                    <span style="color: #28a745; font-weight: bold; font-size: 12px; margin-right: 10px;">
+                        ✅ Completed
+                    </span>
+                    <button onclick="deleteBloodRequest('${requestId}')" 
+                            class="btn-danger btn-small" 
+                            title="Delete Request"
+                            style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                        🗑️ Delete
+                    </button>
+                `;
+            }
+            
+            tableHTML += `
+                <tr style="border-bottom: 1px solid #e9ecef; ${rowStyle}">
+                    <td style="padding: 15px; font-weight: 500; color: #dc3545;">${requestId}</td>
+                    <td style="padding: 15px; font-weight: 500;">${receiverName}</td>
+                    <td style="padding: 15px; font-weight: 500;">
+                        <span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${bloodType}</span>
+                    </td>
+                    <td style="padding: 15px; font-weight: 500; color: #28a745;">${quantity} units</td>
+                    <td style="padding: 15px;">
+                        <span class="status-indicator ${priorityClass}">${priority}</span>
+                    </td>
+                    <td style="padding: 15px;">${hospital}</td>
+                    <td style="padding: 15px; ${isUrgent ? 'color: #dc3545; font-weight: bold;' : ''}">${neededByDate}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = tableHTML;
+    }
+
+    // Get CSS class for blood request priority
+    function getBloodRequestPriorityClass(priority) {
+        switch(priority) {
+            case 'Critical': return 'status-urgent';
+            case 'High': return 'status-urgent';
+            case 'Normal': return 'status-normal';
+            default: return 'status-normal';
+        }
+    }
+
+    // Filter blood requests by priority
+    function filterBloodRequests() {
+        const filterValue = document.getElementById('requestFilter').value;
+        
+        if (filterValue === '') {
+            displayBloodRequests();
+        } else {
+            const filteredData = bloodRequestsData.filter(request => request.priority === filterValue);
+            displayBloodRequests(filteredData);
+        }
+    }
+
+    // Refresh blood requests
+    function refreshBloodRequests() {
+        loadBloodRequests();
+    }
+
+    // Approve blood request
+    function approveBloodRequest(requestId) {
+        if (confirm(`Are you sure you want to approve blood request ${requestId}?\n\nThis will mark the request as approved and notify the receiver.`)) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Approving...';
+            button.disabled = true;
+            
+            // Make API call to approve request
+            fetch(`/hospital/blood-requests/${requestId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert(`✅ Blood request ${requestId} approved successfully!`);
+                    
+                    // Refresh both the pending requests and the full blood requests table
+                    loadPendingBloodRequests();
+                    loadBloodRequests();
+                } else {
+                    throw new Error(data.message || 'Failed to approve blood request');
+                }
+            })
+            .catch(error => {
+                console.error('Error approving blood request:', error);
+                alert(`❌ Error approving blood request: ${error.message}`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Reject blood request
+    function rejectBloodRequest(requestId) {
+        if (confirm(`Are you sure you want to reject blood request ${requestId}?\n\nThis action cannot be undone.`)) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Rejecting...';
+            button.disabled = true;
+            
+            // Make API call to reject request
+            fetch(`/hospital/blood-requests/${requestId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert(`✅ Blood request ${requestId} rejected successfully!`);
+                    
+                    // Refresh both the pending requests and the full blood requests table
+                    loadPendingBloodRequests();
+                    loadBloodRequests();
+                } else {
+                    throw new Error(data.message || 'Failed to reject blood request');
+                }
+            })
+            .catch(error => {
+                console.error('Error rejecting blood request:', error);
+                alert(`❌ Error rejecting blood request: ${error.message}`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Complete blood request
+    function completeBloodRequest(requestId) {
+        if (confirm(`Are you sure you want to mark blood request ${requestId} as completed?\n\nThis will notify the receiver that their blood is ready for collection at the hospital.`)) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Completing...';
+            button.disabled = true;
+            
+            // Make API call to complete request
+            fetch(`/hospital/blood-requests/${requestId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert(`🎉 Blood request ${requestId} completed successfully!\n\nThe receiver has been notified to collect their blood from the hospital.`);
+                    
+                    // Refresh the blood requests table
+                    loadBloodRequests();
+                } else {
+                    throw new Error(data.message || 'Failed to complete blood request');
+                }
+            })
+            .catch(error => {
+                console.error('Error completing blood request:', error);
+                alert(`❌ Error completing blood request: ${error.message}`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        }
+    }
+
+    // Delete blood request (for completed requests only)
+    function deleteBloodRequest(requestId) {
+        if (confirm(`Are you sure you want to delete blood request ${requestId}?\n\nThis action will permanently remove the request from the system.\n\nNote: This should only be done after the receiver has collected their blood.`)) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Deleting...';
+            button.disabled = true;
+            
+            // Make API call to delete request
+            fetch(`/hospital/blood-requests/${requestId}/delete`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert(`✅ Blood request ${requestId} deleted successfully!`);
+                    
+                    // Refresh the blood requests table
+                    loadBloodRequests();
+                } else {
+                    throw new Error(data.message || 'Failed to delete blood request');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting blood request:', error);
+                alert(`❌ Error deleting blood request: ${error.message}`);
                 
                 // Reset button state
                 button.innerHTML = originalText;

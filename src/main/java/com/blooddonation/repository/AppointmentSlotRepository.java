@@ -26,4 +26,8 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
     // Simple count query to test table access
     @Query("SELECT COUNT(s) FROM AppointmentSlot s")
     Long countSlots();
+    
+    // Find only available slots (availableDonors > 0)
+    @Query("SELECT s FROM AppointmentSlot s WHERE s.availableDonors > 0 ORDER BY s.slotDate ASC, s.slotTime ASC")
+    List<AppointmentSlot> findAvailableSlots();
 }

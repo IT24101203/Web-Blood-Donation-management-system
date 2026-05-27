@@ -137,6 +137,30 @@
         </div>
       </div>
 
+      <!-- Observer Pattern Notifications Section -->
+      <div id="notificationsSection" class="mb-8 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-red-600">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-900">
+              <i class="fas fa-bell text-red-600 mr-2"></i>
+              System Notifications
+              <span id="notificationBadge" class="ml-2 px-3 py-1 text-xs font-bold text-white bg-red-600 rounded-full">0</span>
+            </h2>
+            <button onclick="clearNotifications()" class="text-sm text-gray-600 hover:text-red-600 transition">
+              <i class="fas fa-trash-alt mr-1"></i>
+              Clear All
+            </button>
+          </div>
+          <div id="notificationsList" class="space-y-3 max-h-96 overflow-y-auto">
+            <!-- Notifications will be loaded here by JavaScript -->
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+              <p>Loading notifications...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <div class="stats-card rounded-lg p-6 admin-card">
@@ -1260,6 +1284,139 @@
         document.getElementById('receiverCount').textContent = 'Error';
       }
     }
+
+    // Function to load admin notifications from Observer Pattern
+    async function loadAdminNotifications() {
+      try {
+        console.log('🔔 Loading admin notifications from Observer Pattern...');
+        const response = await fetch('/admin/notifications');
+        const notifications = await response.json();
+        
+        console.log('📬 Notifications loaded:', notifications.length);
+        
+        if (notifications && notifications.length > 0) {
+          // Show notifications section
+          document.getElementById('notificationsSection').classList.remove('hidden');
+          
+          // Update badge
+          document.getElementById('notificationBadge').textContent = notifications.length;
+          
+          // Display notifications
+          displayNotifications(notifications);
+        } else {
+          console.log('📭 No notifications to display');
+          // Hide notifications section if empty
+          document.getElementById('notificationsSection').classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('❌ Error loading notifications:', error);
+        document.getElementById('notificationsSection').classList.add('hidden');
+      }
+    }
+
+    // Function to display notifications
+    function displayNotifications(notifications) {
+      const notificationsList = document.getElementById('notificationsList');
+      
+      if (!notifications || notifications.length === 0) {
+        notificationsList.innerHTML = `
+          <div class="text-center text-gray-500 py-4">
+            <i class="fas fa-bell-slash text-2xl mb-2"></i>
+            <p>No notifications</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Sort notifications by timestamp (newest first)
+      const sortedNotifications = notifications.sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+      );
+      
+      // Build HTML for notifications
+      notificationsList.innerHTML = sortedNotifications.map(notification => {
+        const typeColors = {
+          'success': 'bg-green-50 border-green-200 text-green-800',
+          'danger': 'bg-red-50 border-red-200 text-red-800',
+          'info': 'bg-blue-50 border-blue-200 text-blue-800',
+          'warning': 'bg-yellow-50 border-yellow-200 text-yellow-800'
+        };
+        
+        const color = typeColors[notification.type] || typeColors['info'];
+        const timestamp = new Date(notification.timestamp).toLocaleString();
+        
+        return `
+          <div class="border-2 ${color} rounded-lg p-4 transition hover:shadow-md">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 text-2xl mr-3">
+                ${notification.icon || '📢'}
+              </div>
+              <div class="flex-1">
+                <p class="font-semibold text-sm mb-1">${notification.message}</p>
+                <div class="grid grid-cols-2 gap-2 text-xs mt-2">
+                  <div><strong>Blood Type:</strong> ${notification.bloodType}</div>
+                  <div><strong>Quantity:</strong> ${notification.quantity} units</div>
+                  <div><strong>Hospital:</strong> ${notification.hospital}</div>
+                  <div><strong>Priority:</strong> ${notification.priority}</div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                  <i class="fas fa-clock mr-1"></i>
+                  ${timestamp}
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Function to clear all notifications
+    async function clearNotifications() {
+      if (!confirm('Are you sure you want to clear all notifications?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch('/admin/notifications/clear', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('✅ Notifications cleared');
+          document.getElementById('notificationsSection').classList.add('hidden');
+          document.getElementById('notificationsList').innerHTML = `
+            <div class="text-center text-gray-500 py-4">
+              <i class="fas fa-check-circle text-2xl mb-2 text-green-500"></i>
+              <p>All notifications cleared!</p>
+            </div>
+          `;
+          
+          // Reload notifications after 1 second
+          setTimeout(() => {
+            loadAdminNotifications();
+          }, 1000);
+        } else {
+          alert('Error clearing notifications: ' + result.message);
+        }
+      } catch (error) {
+        console.error('❌ Error clearing notifications:', error);
+        alert('Error clearing notifications');
+      }
+    }
+
+    // Load notifications when page loads
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Admin Dashboard loaded - initializing...');
+      loadAdminNotifications();
+      
+      // Refresh notifications every 10 seconds
+      setInterval(loadAdminNotifications, 10000);
+    });
   </script>
 </body>
 </html>

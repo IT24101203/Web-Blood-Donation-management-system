@@ -49,7 +49,7 @@ public class AppointmentController {
 
         // Read appointment slots (same pattern as donor data reading)
         try {
-            System.out.println("🔍 DEBUG: Starting to load appointment slots...");
+            System.out.println("🔍 DEBUG: Starting to load all appointment slots...");
             List<AppointmentSlot> availableSlots = appointmentSlotService.getAllSlots();
             System.out.println("📊 DEBUG: Loaded " + (availableSlots != null ? availableSlots.size() : "null") + " appointment slots");
             
@@ -155,6 +155,22 @@ public class AppointmentController {
             System.out.println("✅ Appointment saved with ID: " + savedAppointment.getAppointmentId());
             System.out.println("✅ Booking Date: " + savedAppointment.getBookingDate());
             System.out.println("✅ Booking Time: " + savedAppointment.getBookingTime());
+
+            // Decrease available donors count for this slot
+            boolean decreased = appointmentSlotService.decreaseAvailableDonors(slotId);
+            if (decreased) {
+                System.out.println("✅ Successfully decreased available donors for slot " + slotId);
+                
+                // Check if slot is now full
+                boolean slotIsFull = appointmentSlotService.updateSlotAvailability(slotId);
+                if (slotIsFull) {
+                    System.out.println("⚠️ WARNING: Slot " + slotId + " is now FULL - no more appointments can be booked for this slot");
+                } else {
+                    System.out.println("✅ Slot " + slotId + " still has available spots");
+                }
+            } else {
+                System.out.println("❌ Failed to decrease available donors for slot " + slotId);
+            }
 
             System.out.println("🎉 Appointment booking completed successfully!");
             

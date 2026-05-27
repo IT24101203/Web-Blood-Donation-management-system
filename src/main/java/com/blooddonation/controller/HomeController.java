@@ -6,20 +6,25 @@ import com.blooddonation.model.Receiver;
 import com.blooddonation.model.BloodInventory;
 import com.blooddonation.model.HealthAssessment;
 import com.blooddonation.model.DoctorNote;
+import com.blooddonation.model.BloodRequest;
 import com.blooddonation.dto.ApiResponse;
+import com.blooddonation.dto.BloodRequestRequest;
 import com.blooddonation.service.SystemUserService;
 import com.blooddonation.service.DonorService;
 import com.blooddonation.service.ReceiverService;
 import com.blooddonation.service.BloodInventoryService;
 import com.blooddonation.service.HealthAssessmentService;
 import com.blooddonation.service.DoctorNoteService;
+import com.blooddonation.service.BloodRequestService;
 import com.blooddonation.service.AppointmentSlotService;
 import com.blooddonation.repository.AppointmentSlotRepository;
 import com.blooddonation.repository.AppointmentRepository;
+import com.blooddonation.repository.ReceiverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
@@ -52,6 +57,12 @@ public class HomeController {
 
     @Autowired
     private DoctorNoteService doctorNoteService;
+
+    @Autowired
+    private BloodRequestService bloodRequestService;
+    
+    @Autowired
+    private ReceiverRepository receiverRepository;
 
     @Autowired
     private AppointmentSlotService appointmentSlotService;
@@ -147,6 +158,11 @@ public class HomeController {
     }
 
     @GetMapping("/")
+    public String loadPage() {
+        return "Loadpage"; // Returns Loadpage.html as the entry point
+    }
+
+    @GetMapping("/main")
     public String home(@RequestParam(required = false) String success,
                       @RequestParam(required = false) String error,
                       @RequestParam(required = false) String receiverSuccess,
@@ -291,11 +307,68 @@ public class HomeController {
             model.addAttribute("errorMessage", error);
         }
         
+        // Check for notifications
+        String notificationMessage = (String) session.getAttribute("notificationMessage");
+        String notificationType = (String) session.getAttribute("notificationType");
+        String notificationReceiverCnic = (String) session.getAttribute("notificationReceiverCnic");
+        
+        Receiver receiverObj = (Receiver) receiver;
+        if (notificationMessage != null && receiverObj.getNic().equals(notificationReceiverCnic)) {
+            if ("success".equals(notificationType)) {
+                model.addAttribute("successMessage", notificationMessage);
+            } else {
+                model.addAttribute("errorMessage", notificationMessage);
+            }
+            
+            // Clear the notification after displaying
+            session.removeAttribute("notificationMessage");
+            session.removeAttribute("notificationType");
+            session.removeAttribute("notificationReceiverCnic");
+        }
+        
         model.addAttribute("title", "Receiver Dashboard");
         model.addAttribute("pageTitle", "Healthcare Facility Dashboard");
         model.addAttribute("receiver", receiver);
         
         return "ReceiverDashboard";
+    }
+
+    @GetMapping("/receiver/blood-request-history")
+    @ResponseBody
+    public Map<String, Object> getReceiverBloodRequestHistory(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if receiver is logged in
+            Object receiver = session.getAttribute("receiver");
+            if (receiver == null) {
+                response.put("success", false);
+                response.put("message", "Receiver not logged in");
+                return response;
+            }
+            
+            Receiver receiverObj = (Receiver) receiver;
+            String receiverCnic = receiverObj.getNic();
+            
+            // Get all blood requests for this receiver
+            List<BloodRequest> bloodRequests = bloodRequestService.getBloodRequestsByReceiver(receiverCnic);
+            
+            // Add receiver names to blood requests
+            for (BloodRequest request : bloodRequests) {
+                request.setReceiverName(receiverObj.getFullName());
+            }
+            
+            response.put("success", true);
+            response.put("bloodRequests", bloodRequests);
+            response.put("count", bloodRequests.size());
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error retrieving blood request history: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return response;
     }
 
     @GetMapping("/receiver/logout")
@@ -373,6 +446,478 @@ public class HomeController {
         model.addAttribute("receiver", receiver);
         
         return "SearchDonors";
+    }
+
+    @GetMapping("/receiver/blood-request")
+    public String bloodRequestPage(Model model, HttpSession session) {
+        // Check if receiver is logged in
+        Object receiver = session.getAttribute("receiver");
+        if (receiver == null) {
+            return "redirect:/";
+        }
+        
+        Receiver receiverObj = (Receiver) receiver;
+        
+        // Create BloodRequestRequest with pre-filled CNIC
+        BloodRequestRequest bloodRequestRequest = new BloodRequestRequest();
+        bloodRequestRequest.setReceiverCNIC(receiverObj.getNic());
+        
+        model.addAttribute("title", "Blood Request Form");
+        model.addAttribute("pageTitle", "Blood Request Form");
+        model.addAttribute("receiver", receiver);
+        model.addAttribute("bloodRequestRequest", bloodRequestRequest);
+        
+        return "Bloodrequestpage";
+    }
+
+    @PostMapping("/receiver/blood-request")
+    public String submitBloodRequest(@ModelAttribute BloodRequestRequest request,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            // Check if receiver is logged in
+            Object receiverObj = session.getAttribute("receiver");
+            if (receiverObj == null) {
+                return "redirect:/";
+            }
+            
+            Receiver receiver = (Receiver) receiverObj;
+            
+            // Validate that the CNIC matches the logged-in receiver
+            if (!receiver.getNic().equals(request.getReceiverCNIC())) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                    "CNIC does not match your logged-in account. Please contact support.");
+                return "redirect:/receiver/blood-request";
+            }
+            
+            // Create and save the blood request
+            BloodRequest bloodRequest = bloodRequestService.createBloodRequest(request);
+            
+            // Add success message
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "Blood request submitted successfully! Request ID: " + bloodRequest.getRequestId() + 
+                ". You will be notified once it is reviewed by the hospital.");
+            
+            return "redirect:/receiver/dashboard";
+            
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/receiver/blood-request";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", 
+                "An error occurred while submitting your blood request. Please try again.");
+            return "redirect:/receiver/blood-request";
+        }
+    }
+
+    // Hospital Staff Blood Request Management
+    @GetMapping("/hospital/blood-requests")
+    @ResponseBody
+    public Map<String, Object> getBloodRequestsForHospital(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if hospital staff is logged in
+            Object systemUser = session.getAttribute("systemUser");
+            Object userRole = session.getAttribute("userRole");
+            
+            if (systemUser == null) {
+                response.put("success", false);
+                response.put("message", "Hospital staff not logged in");
+                return response;
+            }
+            
+            // Check if user has hospital staff role
+            String role = userRole != null ? userRole.toString().toLowerCase().trim() : "";
+            if (!"hospital staff".equals(role) && !"hospitalstaff".equals(role)) {
+                response.put("success", false);
+                response.put("message", "Access denied. This endpoint is only for hospital staff.");
+                return response;
+            }
+            
+            // Get all blood requests (not just pending ones for now)
+            List<BloodRequest> allRequests = bloodRequestService.getAllBloodRequests();
+            List<BloodRequest> pendingRequests = bloodRequestService.getPendingBloodRequests();
+            
+            // Add receiver names to blood requests
+            for (BloodRequest request : allRequests) {
+                try {
+                    Optional<Receiver> receiver = receiverRepository.findById(request.getReceiverCnic());
+                    if (receiver.isPresent()) {
+                        // Add receiver name to the request object for JSON serialization
+                        request.setReceiverName(receiver.get().getFullName());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error fetching receiver name for CNIC " + request.getReceiverCnic() + ": " + e.getMessage());
+                }
+            }
+            
+            // Debug logging
+            System.out.println("Total blood requests found: " + allRequests.size());
+            System.out.println("Pending blood requests found: " + pendingRequests.size());
+            
+            if (!allRequests.isEmpty()) {
+                BloodRequest firstRequest = allRequests.get(0);
+                System.out.println("First blood request details:");
+                System.out.println("  Request ID: " + firstRequest.getRequestId());
+                System.out.println("  Receiver CNIC: " + firstRequest.getReceiverCnic());
+                System.out.println("  Blood Type: " + firstRequest.getBloodTypeNeeded());
+                System.out.println("  Quantity: " + firstRequest.getQuantity());
+                System.out.println("  Priority: " + firstRequest.getPriority());
+                System.out.println("  Hospital: " + firstRequest.getHospital());
+                System.out.println("  Notes: " + firstRequest.getNotes());
+                System.out.println("  Request Date: " + firstRequest.getRequestDate());
+                System.out.println("  Needed By Date: " + firstRequest.getNeededByDate());
+                System.out.println("  Approved Date: " + firstRequest.getApprovedDate());
+                System.out.println("  Completion Date: " + firstRequest.getCompletionDate());
+            }
+            
+            response.put("success", true);
+            response.put("bloodRequests", allRequests); // Return all requests for now
+            response.put("pendingRequests", pendingRequests);
+            response.put("count", allRequests.size());
+            response.put("pendingCount", pendingRequests.size());
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error retrieving blood requests: " + e.getMessage());
+            e.printStackTrace(); // Add stack trace for debugging
+        }
+        
+        return response;
+    }
+
+    @PostMapping("/hospital/blood-requests/{requestId}/approve")
+    @ResponseBody
+    public Map<String, Object> approveBloodRequest(@PathVariable Long requestId, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if hospital staff is logged in
+            Object systemUser = session.getAttribute("systemUser");
+            Object userRole = session.getAttribute("userRole");
+            
+            if (systemUser == null) {
+                response.put("success", false);
+                response.put("message", "Hospital staff not logged in");
+                return response;
+            }
+            
+            // Check if user has hospital staff role
+            String role = userRole != null ? userRole.toString().toLowerCase().trim() : "";
+            if (!"hospital staff".equals(role) && !"hospitalstaff".equals(role)) {
+                response.put("success", false);
+                response.put("message", "Access denied. This endpoint is only for hospital staff.");
+                return response;
+            }
+            
+            // Approve the blood request
+            BloodRequest approvedRequest = bloodRequestService.approveBloodRequest(requestId);
+            
+            // OBSERVER PATTERN: Automatically notify all stakeholders
+            com.blooddonation.observer.BloodRequestObserverManager observerManager = 
+                new com.blooddonation.observer.BloodRequestObserverManager(approvedRequest);
+            observerManager.notifyApproved();
+            
+            // Send notification to receiver (existing code - still works)
+            String receiverCnic = approvedRequest.getReceiverCnic();
+            String notificationMessage = "✅ Your blood request has been approved! Our hospital staff will contact you shortly with further details. Thank you for your patience and trust in our service.";
+            
+            // Store notification for receiver
+            sendNotificationToReceiver(receiverCnic, "APPROVED", notificationMessage, approvedRequest.getRequestId());
+            
+            response.put("success", true);
+            response.put("message", "Blood request approved successfully");
+            response.put("requestId", approvedRequest.getRequestId());
+            response.put("notificationMessage", notificationMessage);
+            
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error approving blood request: " + e.getMessage());
+        }
+        
+        return response;
+    }
+
+    @PostMapping("/hospital/blood-requests/{requestId}/complete")
+    @ResponseBody
+    public Map<String, Object> completeBloodRequest(@PathVariable Long requestId, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if hospital staff is logged in
+            Object systemUser = session.getAttribute("systemUser");
+            Object userRole = session.getAttribute("userRole");
+            
+            if (systemUser == null) {
+                response.put("success", false);
+                response.put("message", "Hospital staff not logged in");
+                return response;
+            }
+            
+            // Check if user has hospital staff role
+            String role = userRole != null ? userRole.toString().toLowerCase().trim() : "";
+            if (!"hospital staff".equals(role) && !"hospitalstaff".equals(role)) {
+                response.put("success", false);
+                response.put("message", "Access denied. This endpoint is only for hospital staff.");
+                return response;
+            }
+            
+            // Complete the blood request
+            BloodRequest completedRequest = bloodRequestService.completeBloodRequest(requestId);
+            
+            // OBSERVER PATTERN: Automatically notify all stakeholders
+            com.blooddonation.observer.BloodRequestObserverManager observerManager = 
+                new com.blooddonation.observer.BloodRequestObserverManager(completedRequest);
+            observerManager.notifyCompleted();
+            
+            // Send advanced notification to receiver about blood collection
+            String receiverCnic = completedRequest.getReceiverCnic();
+            String hospitalName = completedRequest.getHospital();
+            String bloodType = completedRequest.getBloodTypeNeeded();
+            Integer quantity = completedRequest.getQuantity();
+            
+            String notificationMessage = String.format(
+                "🎉 GREAT NEWS! Your blood request has been completed and is ready for collection!\n\n" +
+                "📋 Request Details:\n" +
+                "• Request ID: %d\n" +
+                "• Blood Type: %s\n" +
+                "• Quantity: %d units\n" +
+                "• Hospital: %s\n\n" +
+                "🏥 Please visit %s to collect your blood. Bring a valid ID and this request ID for verification.\n\n" +
+                "⏰ Collection Hours: 8:00 AM - 6:00 PM (Monday to Friday)\n" +
+                "📞 Contact: Hospital Blood Bank - (123) 456-7890\n\n" +
+                "Thank you for using our blood donation system!",
+                completedRequest.getRequestId(), bloodType, quantity, hospitalName, hospitalName
+            );
+            
+            // Store advanced notification for receiver
+            sendNotificationToReceiver(receiverCnic, "COMPLETED", notificationMessage, completedRequest.getRequestId());
+            
+            response.put("success", true);
+            response.put("message", "Blood request completed successfully");
+            response.put("requestId", completedRequest.getRequestId());
+            response.put("notificationMessage", notificationMessage);
+            
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error completing blood request: " + e.getMessage());
+        }
+        
+        return response;
+    }
+
+    // Test endpoint to create sample blood request data
+    @GetMapping("/test/create-sample-blood-requests")
+    @ResponseBody
+    public Map<String, Object> createSampleBloodRequests() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Create sample blood requests for testing
+            BloodRequestRequest request1 = new BloodRequestRequest();
+            request1.setReceiverCNIC("12345-1234567-1");
+            request1.setBloodType("O+");
+            request1.setQuantity(2);
+            request1.setNeededByDate(LocalDate.now().plusDays(3));
+            request1.setHospital("General Hospital");
+            request1.setPriority("High");
+            request1.setNotes("Emergency surgery required");
+            
+            BloodRequestRequest request2 = new BloodRequestRequest();
+            request2.setReceiverCNIC("12345-1234567-2");
+            request2.setBloodType("A+");
+            request2.setQuantity(1);
+            request2.setNeededByDate(LocalDate.now().plusDays(7));
+            request2.setHospital("City Medical Center");
+            request2.setPriority("Normal");
+            request2.setNotes("Scheduled operation");
+            
+            BloodRequest bloodRequest1 = bloodRequestService.createBloodRequest(request1);
+            BloodRequest bloodRequest2 = bloodRequestService.createBloodRequest(request2);
+            
+            response.put("success", true);
+            response.put("message", "Sample blood requests created successfully");
+            response.put("createdRequests", List.of(bloodRequest1.getRequestId(), bloodRequest2.getRequestId()));
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error creating sample blood requests: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return response;
+    }
+
+    @PostMapping("/hospital/blood-requests/{requestId}/reject")
+    @ResponseBody
+    public Map<String, Object> rejectBloodRequest(@PathVariable Long requestId, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if hospital staff is logged in
+            Object systemUser = session.getAttribute("systemUser");
+            Object userRole = session.getAttribute("userRole");
+            
+            if (systemUser == null) {
+                response.put("success", false);
+                response.put("message", "Hospital staff not logged in");
+                return response;
+            }
+            
+            // Check if user has hospital staff role
+            String role = userRole != null ? userRole.toString().toLowerCase().trim() : "";
+            if (!"hospital staff".equals(role) && !"hospitalstaff".equals(role)) {
+                response.put("success", false);
+                response.put("message", "Access denied. This endpoint is only for hospital staff.");
+                return response;
+            }
+            
+            // Get receiver CNIC before deletion
+            Optional<BloodRequest> requestOpt = bloodRequestService.getBloodRequestById(requestId);
+            String receiverCnic = requestOpt.isPresent() ? requestOpt.get().getReceiverCnic() : "Unknown";
+            Long requestIdLong = requestOpt.isPresent() ? requestOpt.get().getRequestId() : requestId;
+            
+            // Delete the blood request
+            bloodRequestService.deleteBloodRequest(requestId);
+            
+            // Send notification to receiver
+            String notificationMessage = "❌ We regret to inform you that your blood request could not be processed due to an issue. Please contact our support team for further assistance. We sincerely apologize for any inconvenience caused.";
+            
+            // Store notification for receiver
+            sendNotificationToReceiver(receiverCnic, "REJECTED", notificationMessage, requestIdLong);
+            
+            response.put("success", true);
+            response.put("message", "Blood request rejected and deleted successfully");
+            response.put("notificationMessage", notificationMessage);
+            
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error rejecting blood request: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return response;
+    }
+
+    @DeleteMapping("/hospital/blood-requests/{requestId}/delete")
+    @ResponseBody
+    public Map<String, Object> deleteBloodRequest(@PathVariable Long requestId, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Check if hospital staff is logged in
+            Object systemUser = session.getAttribute("systemUser");
+            Object userRole = session.getAttribute("userRole");
+            
+            if (systemUser == null) {
+                response.put("success", false);
+                response.put("message", "Hospital staff not logged in");
+                return response;
+            }
+            
+            // Check if user has hospital staff role
+            String role = userRole != null ? userRole.toString().toLowerCase().trim() : "";
+            if (!"hospital staff".equals(role) && !"hospitalstaff".equals(role)) {
+                response.put("success", false);
+                response.put("message", "Access denied. This endpoint is only for hospital staff.");
+                return response;
+            }
+            
+            // Check if blood request exists and is completed
+            Optional<BloodRequest> requestOpt = bloodRequestService.getBloodRequestById(requestId);
+            if (requestOpt.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Blood request not found");
+                return response;
+            }
+            
+            BloodRequest bloodRequest = requestOpt.get();
+            
+            // Only allow deletion of completed requests
+            if (bloodRequest.getCompletionDate() == null) {
+                response.put("success", false);
+                response.put("message", "Only completed blood requests can be deleted");
+                return response;
+            }
+            
+            // Delete the blood request
+            bloodRequestService.deleteBloodRequest(requestId);
+            
+            response.put("success", true);
+            response.put("message", "Blood request deleted successfully");
+            response.put("requestId", requestId);
+            
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error deleting blood request: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return response;
+    }
+
+    // Notification endpoint for receiver dashboard (legacy - redirects to new API)
+    @GetMapping("/receiver/notifications-legacy")
+    public String getReceiverNotificationsLegacy(HttpSession session, Model model) {
+        // Check if receiver is logged in
+        Object receiver = session.getAttribute("receiver");
+        if (receiver == null) {
+            return "redirect:/";
+        }
+        
+        // Redirect to receiver dashboard - notifications will be loaded via AJAX
+        return "redirect:/receiver/dashboard";
+    }
+
+    // Test endpoint to check specific blood request
+    @GetMapping("/test/check-blood-request/{requestId}")
+    @ResponseBody
+    public Map<String, Object> checkBloodRequest(@PathVariable Long requestId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Optional<BloodRequest> bloodRequest = bloodRequestService.getBloodRequestById(requestId);
+            
+            if (bloodRequest.isPresent()) {
+                BloodRequest request = bloodRequest.get();
+                response.put("success", true);
+                response.put("found", true);
+                response.put("bloodRequest", request);
+                response.put("requestId", request.getRequestId());
+                response.put("receiverCnic", request.getReceiverCnic());
+                response.put("bloodType", request.getBloodTypeNeeded());
+                response.put("quantity", request.getQuantity());
+                response.put("hospital", request.getHospital());
+                response.put("priority", request.getPriority());
+                response.put("notes", request.getNotes());
+                response.put("requestDate", request.getRequestDate());
+                response.put("neededByDate", request.getNeededByDate());
+            } else {
+                response.put("success", true);
+                response.put("found", false);
+                response.put("message", "Blood request with ID " + requestId + " not found");
+            }
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error checking blood request: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return response;
     }
 
     @GetMapping("/receiver/search-donors/api")
@@ -1096,18 +1641,31 @@ public class HomeController {
                     appointmentData.put("time", "N/A");
                 }
                 
-                // Get slot location from Appointment_Slots table
+                // Get slot information from Appointment_Slots table
                 String slotLocation = "Unknown Location";
+                String slotDate = "N/A";
+                String slotTime = "N/A";
                 try {
                     if (appointment.getSlotId() != null) {
                         Optional<com.blooddonation.model.AppointmentSlot> slot = appointmentSlotRepository.findById(appointment.getSlotId());
                         if (slot.isPresent()) {
-                            slotLocation = slot.get().getLocation() != null ? slot.get().getLocation() : "Unknown Location";
+                            com.blooddonation.model.AppointmentSlot slotData = slot.get();
+                            slotLocation = slotData.getLocation() != null ? slotData.getLocation() : "Unknown Location";
+                            slotDate = slotData.getSlotDate() != null ? slotData.getSlotDate().toString() : "N/A";
+                            slotTime = slotData.getSlotTime() != null ? slotData.getSlotTime() : "N/A";
+                            
+                            System.out.println("  Slot Date: " + slotDate);
+                            System.out.println("  Slot Time: " + slotTime);
+                            System.out.println("  Location: " + slotLocation);
                         }
                     }
                 } catch (Exception e) {
-                    System.err.println("Error fetching slot location for SlotID " + appointment.getSlotId() + ": " + e.getMessage());
+                    System.err.println("Error fetching slot information for SlotID " + appointment.getSlotId() + ": " + e.getMessage());
                 }
+                
+                // Add slot date and time to appointment data
+                appointmentData.put("slotDate", slotDate);
+                appointmentData.put("slotTime", slotTime);
                 
                 // Add display data with better formatting
                 appointmentData.put("donorName", "Donor " + appointment.getDonorNic());
@@ -1799,6 +2357,57 @@ public class HomeController {
         }
     }
 
+    // API endpoint to get admin notifications from Observer Pattern
+    @GetMapping("/admin/notifications")
+    @ResponseBody
+    public List<Map<String, Object>> getAdminNotifications(HttpSession session) {
+        System.out.println("=== Getting admin notifications from Observer Pattern ===");
+        
+        // Check if admin/hospital staff is logged in
+        Object systemUser = session.getAttribute("systemUser");
+        if (systemUser == null) {
+            System.out.println("❌ No user logged in");
+            return new ArrayList<>();
+        }
+        
+        // Get notifications from NotificationManager (Singleton)
+        List<Map<String, Object>> notifications = 
+            com.blooddonation.observer.NotificationManager.getInstance().getAdminNotifications();
+        
+        System.out.println("📬 Retrieved " + notifications.size() + " admin notifications");
+        
+        // Mark as read when fetched
+        notifications.forEach(notification -> notification.put("read", true));
+        
+        return notifications;
+    }
+    
+    // API endpoint to clear admin notifications
+    @PostMapping("/admin/notifications/clear")
+    @ResponseBody
+    public Map<String, Object> clearAdminNotifications(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        // Check if admin/hospital staff is logged in
+        Object systemUser = session.getAttribute("systemUser");
+        if (systemUser == null) {
+            response.put("success", false);
+            response.put("message", "Unauthorized");
+            return response;
+        }
+        
+        try {
+            com.blooddonation.observer.NotificationManager.getInstance().clearAdminNotifications();
+            response.put("success", true);
+            response.put("message", "Notifications cleared successfully");
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error clearing notifications: " + e.getMessage());
+        }
+        
+        return response;
+    }
+
     // Blood Inventory Management endpoints
     @PostMapping("/hospital/blood-inventory")
     @ResponseBody
@@ -1997,6 +2606,7 @@ public class HomeController {
 
     // Simple in-memory notification storage (for demo purposes)
     private static Map<String, List<Map<String, Object>>> donorNotifications = new HashMap<>();
+    private static Map<String, List<Map<String, Object>>> receiverNotifications = new HashMap<>();
     
     private void storeNotificationForDonor(String donorNic, String message, String status, String doctorNotes) {
         Map<String, Object> notification = new HashMap<>();
@@ -2014,6 +2624,38 @@ public class HomeController {
             notifications.remove(0);
         }
     }
+    
+    private void storeNotificationForReceiver(String receiverCnic, String message, String status, Long requestId) {
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("message", message);
+        notification.put("status", status);
+        notification.put("requestId", requestId);
+        notification.put("timestamp", LocalDateTime.now().toString());
+        notification.put("read", false);
+        
+        receiverNotifications.computeIfAbsent(receiverCnic, k -> new ArrayList<>()).add(notification);
+        
+        // Keep only last 10 notifications per receiver
+        List<Map<String, Object>> notifications = receiverNotifications.get(receiverCnic);
+        if (notifications.size() > 10) {
+            notifications.remove(0);
+        }
+    }
+    
+    // Helper method to send notification to receiver
+    private void sendNotificationToReceiver(String receiverCnic, String status, String message, Long requestId) {
+        try {
+            System.out.println("📱 Sending notification to receiver " + receiverCnic + " - Status: " + status);
+            System.out.println("📝 Message: " + message);
+            System.out.println("📋 Request ID: " + requestId);
+            
+            // Store notification for receiver to see
+            storeNotificationForReceiver(receiverCnic, message, status, requestId);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error sending notification to receiver: " + e.getMessage());
+        }
+    }
 
     // API endpoint to get notifications for donor
     @GetMapping("/donor/notifications")
@@ -2023,6 +2665,23 @@ public class HomeController {
         if (donor instanceof Donor) {
             Donor donorObj = (Donor) donor;
             List<Map<String, Object>> notifications = donorNotifications.getOrDefault(donorObj.getNic(), new ArrayList<>());
+            
+            // Mark as read when fetched
+            notifications.forEach(notification -> notification.put("read", true));
+            
+            return notifications;
+        }
+        return new ArrayList<>();
+    }
+    
+    // API endpoint to get notifications for receiver
+    @GetMapping("/receiver/notifications")
+    @ResponseBody
+    public List<Map<String, Object>> getReceiverNotifications(HttpSession session) {
+        Object receiver = session.getAttribute("receiver");
+        if (receiver instanceof Receiver) {
+            Receiver receiverObj = (Receiver) receiver;
+            List<Map<String, Object>> notifications = receiverNotifications.getOrDefault(receiverObj.getNic(), new ArrayList<>());
             
             // Mark as read when fetched
             notifications.forEach(notification -> notification.put("read", true));
@@ -2249,17 +2908,8 @@ public class HomeController {
                                      ", Has Reply: " + (msg.getReplyText() != null));
                 }
                 
-                // If no messages found for this donor, show all messages for testing
-                if (messages.isEmpty()) {
-                    System.out.println("No messages found for donor " + donorNic + ", showing all messages for testing...");
-                    List<com.blooddonation.model.DonorSupportMessage> allMessages = 
-                        donorSupportMessageService.getAllMessages();
-                    System.out.println("All messages in database: " + allMessages.size());
-                    model.addAttribute("messages", allMessages);
-                    model.addAttribute("showAllMessages", true); // Flag to indicate we're showing all messages
-                } else {
-                    model.addAttribute("messages", messages);
-                }
+                // Always show only the donor's own messages
+                model.addAttribute("messages", messages);
             } catch (Exception e) {
                 System.err.println("Error fetching donor messages: " + e.getMessage());
                 e.printStackTrace();

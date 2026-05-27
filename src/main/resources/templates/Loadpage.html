@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeFlow - Blood Donation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fef2f2 0%, #ffffff 50%, #fce7f3 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated Background Blobs */
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .bg-blob-1 {
+            width: 400px;
+            height: 400px;
+            background: #fecaca;
+            top: 10%;
+            left: 5%;
+        }
+
+        .bg-blob-2 {
+            width: 500px;
+            height: 500px;
+            background: #fbcfe8;
+            top: 20%;
+            right: 5%;
+            animation-delay: 1s;
+        }
+
+        .bg-blob-3 {
+            width: 350px;
+            height: 350px;
+            background: #fecdd3;
+            bottom: 10%;
+            left: 50%;
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+        }
+
+        /* Floating Droplets */
+        .droplet {
+            position: fixed;
+            font-size: 30px;
+            opacity: 0.2;
+            pointer-events: none;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(180deg);
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: relative;
+            z-index: 100;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .nav-container {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc2626, #db2777);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .logo-icon::before {
+            content: '❤️';
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #dc2626, #db2777, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .join-btn {
+            background: linear-gradient(135deg, #dc2626, #db2777, #e11d48);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .join-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.6);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-content {
+            animation: fadeInLeft 1s ease;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #fee2e2, #fce7f3);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            border: 2px solid #fecaca;
+            font-weight: 600;
+            color: #dc2626;
+            font-size: 0.875rem;
+            animation: pulse 2s ease-in-out infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #1f2937;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title-gradient {
+            display: block;
+            background: linear-gradient(135deg, #dc2626, #db2777, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            margin-top: 0.5rem;
+            animation: gradientShift 3s ease infinite;
+            background-size: 200% auto;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-badge {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #fef2f2, #fce7f3);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Blood Type Display */
+        .blood-display {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInRight 1s ease;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .pulse-ring {
+            position: absolute;
+            border: 4px solid #fca5a5;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: ping-ring 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .pulse-ring:nth-child(1) { width: 120px; height: 120px; }
+        .pulse-ring:nth-child(2) { width: 240px; height: 240px; animation-delay: 0.5s; }
+        .pulse-ring:nth-child(3) { width: 360px; height: 360px; animation-delay: 1s; }
+
+        @keyframes ping-ring {
+            75%, 100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .blood-card {
+            position: relative;
+            z-index: 10;
+            background: white;
+            border-radius: 2rem;
+            padding: 3rem;
+            width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        .blood-card:hover {
+            transform: scale(1.05) rotate(1deg);
+        }
+
+        .urgent-badge {
+            position: absolute;
+            top: -1rem;
+            right: -1rem;
+            background: linear-gradient(135deg, #fbbf24, #f97316);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .blood-droplet {
+            font-size: 10rem;
+            text-align: center;
+            animation: dropletBounce 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(220, 38, 38, 0.3));
+        }
+
+        @keyframes dropletBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .blood-type {
+            text-align: center;
+            font-size: 4rem;
+            font-weight: 900;
+            color: #1f2937;
+            margin: 1rem 0;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .blood-types-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .blood-type-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .blood-type-btn.active {
+            background: linear-gradient(135deg, #dc2626, #db2777);
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+        }
+
+        .impact-counter {
+            background: linear-gradient(135deg, #fef2f2, #fce7f3);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .impact-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 4rem;
+            border: 1px solid #fecaca;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.1);
+        }
+
+        .stat-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #dc2626, #db2777);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover .stat-icon {
+            transform: rotate(6deg) scale(1.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #1f2937;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features-section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-badge {
+            background: linear-gradient(135deg, #dc2626, #db2777);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #1f2937;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-box {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #fef2f2, #fce7f3);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-box:hover::before {
+            transform: translate(50%, -50%) scale(2);
+        }
+
+        .feature-emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-description {
+            color: #6b7280;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #dc2626, #db2777, #e11d48);
+            border-radius: 3rem;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(220, 38, 38, 0.4);
+        }
+
+        .cta-bg-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.1;
+        }
+
+        .cta-circle {
+            position: absolute;
+            border: 4px solid white;
+            border-radius: 50%;
+            animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .cta-circle:nth-child(1) {
+            width: 160px;
+            height: 160px;
+            top: 2.5rem;
+            left: 2.5rem;
+        }
+
+        .cta-circle:nth-child(2) {
+            width: 128px;
+            height: 128px;
+            bottom: 2.5rem;
+            right: 2.5rem;
+            animation-delay: 1s;
+        }
+
+        .cta-circle:nth-child(3) {
+            width: 256px;
+            height: 256px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 0.5s;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .cta-heart {
+            font-size: 5rem;
+            animation: bounce 2s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        .cta-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .cta-description {
+            font-size: 1.5rem;
+            opacity: 0.95;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            background: white;
+            color: #dc2626;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            border: none;
+            font-size: 1.25rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cta-features {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .cta-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+            }
+            .blood-display {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+            .cta-title {
+                font-size: 2rem;
+            }
+            .nav-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Background Blobs -->
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+
+<!-- Floating Droplets -->
+<div id="droplets"></div>
+
+<!-- Navigation -->
+<nav>
+    <div class="nav-container">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span class="logo-text">LifeFlow</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="join-btn" onclick="goToMain()">
+                <span>✨</span>
+                <span>Join Life Flow</span>
+                <span>→</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="badge">
+                <span>⚡</span>
+                <span>Save Lives in Real-Time</span>
+            </div>
+
+            <h1>
+                Be A
+                <span class="hero-title-gradient">Hero Today</span>
+            </h1>
+
+            <p class="hero-description">
+                Your single donation can save <strong style="color: #dc2626;">three lives</strong>.
+                Join thousands of everyday heroes making extraordinary impacts.
+            </p>
+
+            <div class="hero-stats">
+                <div class="stat-badge">
+                    <span>👥</span>
+                    <strong>15K+ Active Heroes</strong>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div><strong>Fast</strong></div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <div><strong>Safe</strong></div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💝</div>
+                    <div><strong>Impactful</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Type Display -->
+        <div class="blood-display">
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+            <div class="pulse-ring"></div>
+
+            <div class="blood-card">
+                <div class="urgent-badge">Urgent! 🚨</div>
+
+                <div class="blood-droplet">💧</div>
+                <div class="blood-type" id="currentBloodType">O+</div>
+                <p style="text-align: center; color: #6b7280; font-weight: 600;">Needed Now</p>
+
+                <div class="blood-types-grid" id="bloodTypesGrid">
+                    <button class="blood-type-btn active">A+</button>
+                    <button class="blood-type-btn">A-</button>
+                    <button class="blood-type-btn">B+</button>
+                    <button class="blood-type-btn">B-</button>
+                    <button class="blood-type-btn">AB+</button>
+                    <button class="blood-type-btn">AB-</button>
+                    <button class="blood-type-btn">O+</button>
+                    <button class="blood-type-btn">O-</button>
+                </div>
+
+                <div class="impact-counter">
+                    <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">Impact Counter</div>
+                    <div class="impact-number" id="impactCounter">2431</div>
+                    <div style="font-size: 0.75rem; color: #9ca3af;">Lives saved this week</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">15,234</div>
+                <div class="stat-label">Active Donors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">💧</div>
+                <div class="stat-value">42,891</div>
+                <div class="stat-label">Lives Saved</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value">1,456</div>
+                <div class="stat-label">This Month</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-value">87</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+        <div class="section-header">
+            <div class="section-badge">✨ Why LifeFlow?</div>
+            <h2 class="section-title">
+                Save Lives, <span style="background: linear-gradient(135deg, #dc2626, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Simplified</span>
+            </h2>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-box">
+                <div class="feature-emoji">🎯</div>
+                <h3 class="feature-title">Smart Matching</h3>
+                <p class="feature-description">
+                    AI-powered system connects you with nearby donors and recipients instantly.
+                </p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-emoji">📅</div>
+                <h3 class="feature-title">Flexible Scheduling</h3>
+                <p class="feature-description">
+                    Book appointments that fit your life. Cancel or reschedule anytime.
+                </p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-emoji">🏆</div>
+                <h3 class="feature-title">Earn Recognition</h3>
+                <p class="feature-description">
+                    Track your impact, collect badges, and join our hall of heroes.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <div class="cta-bg-pattern">
+            <div class="cta-circle"></div>
+            <div class="cta-circle"></div>
+            <div class="cta-circle"></div>
+        </div>
+
+        <div class="cta-content">
+            <div class="cta-heart">❤️</div>
+            <h2 class="cta-title">Your Journey Starts Here</h2>
+            <p class="cta-description">
+                Join our community of heroes. Every donation makes a difference.
+                Every life matters. Be the hope someone needs.
+            </p>
+            <button class="cta-button" onclick="goToMain()">
+                <span>💝</span>
+                <span>Start Saving Life</span>
+                <span>→</span>
+            </button>
+
+            <div class="cta-features">
+                <div class="cta-feature">
+                    <div class="cta-dot"></div>
+                    <span>Quick Registration</span>
+                </div>
+                <div class="cta-feature">
+                    <div class="cta-dot" style="animation-delay: 0.5s;"></div>
+                    <span>Verified & Secure</span>
+                </div>
+                <div class="cta-feature">
+                    <div class="cta-dot" style="animation-delay: 1s;"></div>
+                    <span>Instant Impact</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Create floating droplets
+    const dropletsContainer = document.getElementById('droplets');
+    for (let i = 0; i < 15; i++) {
+        const droplet = document.createElement('div');
+        droplet.className = 'droplet';
+        droplet.textContent = '💧';
+        droplet.style.left = Math.random() * 100 + '%';
+        droplet.style.animationDuration = (10 + Math.random() * 10) + 's';
+        droplet.style.animationDelay = Math.random() * 5 + 's';
+        dropletsContainer.appendChild(droplet);
+    }
+
+    // Blood type rotation
+    const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+    let currentIndex = 0;
+    const bloodTypeElement = document.getElementById('currentBloodType');
+    const buttons = document.querySelectorAll('.blood-type-btn');
+
+    function rotateBloodType() {
+        currentIndex = (currentIndex + 1) % bloodTypes.length;
+        bloodTypeElement.textContent = bloodTypes[currentIndex];
+
+        buttons.forEach((btn, idx) => {
+            if (idx === currentIndex) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    setInterval(rotateBloodType, 2000);
+
+    // Animate impact counter
+    let impactCount = 2431;
+    const impactElement = document.getElementById('impactCounter');
+
+    setInterval(() => {
+        impactCount += Math.floor(Math.random() * 3);
+        impactElement.textContent = impactCount.toLocaleString();
+    }, 5000);
+
+    // Button click handler - Navigate to main page
+    function goToMain() {
+        window.location.href = '/main';
+    }
+
+    // Blood type button clicks
+    buttons.forEach((btn, idx) => {
+        btn.addEventListener('click', () => {
+            currentIndex = idx;
+            bloodTypeElement.textContent = bloodTypes[idx];
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>

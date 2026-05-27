@@ -10,4 +10,7 @@ public interface AppointmentSlotService {
     List<AppointmentSlot> getAvailableSlotsByDateAndCenter(LocalDate date, String center);
     List<AppointmentSlot> getSlotsByLocation(String location);
     Long countSlots();
+    boolean updateSlotAvailability(Long slotId);
+    List<AppointmentSlot> getAvailableSlotsOnly();
+    boolean decreaseAvailableDonors(Long slotId);
 }
